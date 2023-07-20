@@ -15,7 +15,6 @@ return new class extends Migration
         Schema::create('paper_props', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(PaperType::class);
-            $table->string('printing_method');
             $table->integer('grammage');
             $table->string('size');
             $table->integer('price');

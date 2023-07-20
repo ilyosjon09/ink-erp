@@ -8,4 +8,11 @@ use Illuminate\Database\Eloquent\Model;
 class PaperType extends Model
 {
     use HasFactory;
+
+    protected $guarded = [];
+
+    public function properties()
+    {
+        return $this->hasMany(PaperProp::class);
+    }
 }

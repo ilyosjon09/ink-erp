@@ -242,7 +242,7 @@ return [
         'footer' => [
             'should_show_logo' => false,
         ],
-        'max_content_width' => '7xl',
+        'max_content_width' => '6xl',
         'notifications' => [
             'vertical_alignment' => 'top',
             'alignment' => 'right',
@@ -253,7 +253,7 @@ return [
                 'are_collapsible' => true,
             ],
             'width' => '16vw',
-            'collapsed_width' => '4vw',
+            'collapsed_width' => '5vw',
         ],
     ],
 
