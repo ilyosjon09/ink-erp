@@ -9,8 +9,15 @@ class Order extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+
     public function client()
     {
         return $this->belongsTo(Client::class);
+    }
+
+    public function paperType()
+    {
+        return $this->belongsTo(PaperType::class);
     }
 }

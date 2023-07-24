@@ -8,4 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class ServicePrice extends Model
 {
     use HasFactory;
+
+    protected $guarded = [];
+
+    protected $casts = [
+        'after_thousand' => 'boolean'
+    ];
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
 }

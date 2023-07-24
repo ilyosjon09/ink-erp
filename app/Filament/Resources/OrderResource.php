@@ -5,6 +5,8 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
+use App\Models\PaperProp;
+use App\Models\PaperType;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
@@ -25,6 +27,7 @@ use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class OrderResource extends Resource
@@ -32,6 +35,7 @@ class OrderResource extends Resource
     protected static ?string $model = Order::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-list';
+    protected static ?string $navigationGroup = 'Работа';
 
     protected static ?string $modelLabel = 'заказ';
     protected static ?string $pluralModelLabel = 'заказы';
@@ -44,25 +48,45 @@ class OrderResource extends Resource
                     Card::make([
                         TextInput::make('item_name')->label(__('Название товара'))
                             ->placeholder(__('Название товара'))->required()->columnSpanFull(),
+
+                        // Paper
                         Fieldset::make(_('Бумага'))->schema([
                             Select::make('paper_type')
                                 ->label(__('Тип бумаги'))
-                                ->options([
-                                    'draft' => 'Draft',
-                                    'reviewing' => 'Reviewing',
-                                    'published' => 'Published',
-                                ])
+                                ->relationship('paperType', 'name')
                                 ->columnSpanFull()
+                                ->reactive()
+                                ->afterStateUpdated(fn (callable $set) => $set('grammage', null))
                                 ->required(),
                             Select::make('grammage')
                                 ->label(__('Граммаж'))
-                                ->disabled(fn (Closure $get) => $get('paper_type') === null)
-                                ->required(),
+                                ->options(function (callable $get) {
+                                    $paperTypeId = $get('paper_type');
+                                    if (!$paperTypeId) {
+                                        return [];
+                                    }
+                                    return PaperProp::select('grammage')->where('paper_type_id', $paperTypeId)->groupBy('grammage')->get()->pluck('grammage', 'grammage');
+                                })
+                                ->required()
+                                ->reactive()
+                                ->afterStateUpdated(fn (callable $set) => $set('size', null))
+                                ->disabled(fn (callable $get) => !(bool) $get('paper_type')),
                             Select::make('size')
                                 ->label(__('Размер'))
-                                ->disabled(fn (Closure $get) => $get('grammage') === null)
+                                ->options(function (callable $get) {
+                                    $grammage = $get('grammage');
+                                    $paperTypeId = $get('paper_type');
+
+                                    if (!$grammage) {
+                                        return [];
+                                    }
+                                    return PaperProp::select('id', 'size')->where('grammage', $grammage)->where('paper_type_id', $paperTypeId)->get()->pluck('size', 'id');
+                                })
+                                ->disabled(fn (callable $get) => !(bool) $get('grammage'))
                                 ->required(),
                         ]),
+
+                        // Piece and tirage
                         Fieldset::make(__('Штук и тираж'))->schema([
                             TextInput::make('amount_per_page')->type('number')
                                 ->label(__('Штук на листе'))
@@ -157,18 +181,19 @@ class OrderResource extends Resource
                                 TextInput::make('rep_name')->label(__('Контактное лицо'))
                                     ->required(),
                                 Fieldset::make('contacts')->schema([
-                                    TextInput::make('phone_primary')->label(__('Основной номер телефона'))
+                                    TextInput::make('contacts.phone_primary')->label(__('Основной номер телефона'))
                                         ->required(),
-                                    TextInput::make('phone_secondary')->label(__('Дополнительный номер телефона')),
+                                    TextInput::make('contacts.phone_secondary')->label(__('Дополнительный номер телефона')),
                                 ])->label('Контактная информация')
                             ])
                             ->preload()
+                            ->disablePlaceholderSelection()
                             ->relationship('client', 'name')
                             ->label('Клиент'),
                     ]),
                     Card::make([
                         FileUpload::make('item_image')->label(__('Изображение')),
-                    ]),
+                    ])->extraAttributes(['class' => 'bg-red-500']),
                 ])->columnSpan(1)
             ])->columns(3);
     }

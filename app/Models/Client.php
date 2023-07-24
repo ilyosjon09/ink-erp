@@ -9,6 +9,11 @@ class Client extends Model
 {
     use HasFactory;
 
+    protected $guarded = [];
+    protected $casts = [
+        'contacts' => 'json'
+    ];
+
     public function orders()
     {
         return $this->hasMany(Order::class);

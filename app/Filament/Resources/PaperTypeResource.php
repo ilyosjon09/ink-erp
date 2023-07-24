@@ -22,6 +22,7 @@ class PaperTypeResource extends Resource
     protected static ?string $model = PaperType::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
+    protected static ?string $navigationGroup = 'Справочники';
 
     protected static ?string $modelLabel = 'тип бумаги';
     protected static ?string $pluralModelLabel = 'типы бумаги';

@@ -2,6 +2,7 @@
 
 use App\Models\Client;
 use App\Models\PaperProp;
+use App\Models\User;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -15,6 +16,8 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
+            $table->string('code');
+            $table->date('order_date');
             $table->string('item_name');
             $table->foreignIdFor(Client::class);
             $table->foreignIdFor(PaperProp::class);
@@ -22,7 +25,11 @@ return new class extends Migration
             $table->string('printing_method')->index();
             $table->integer('tirage');
             $table->integer('additional_triage');
+            $table->foreignIdFor(User::class, 'created_by');
+            $table->unsignedTinyInteger('status')->comment('0 - draft, 1 - in production, 2 - post production, 4 - done, 5 - cancelled');
             $table->timestamps();
+
+            $table->unique(['code', 'order_date']);
         });
     }
 

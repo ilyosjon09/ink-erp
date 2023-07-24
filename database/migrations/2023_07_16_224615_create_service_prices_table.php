@@ -16,9 +16,9 @@ return new class extends Migration
             $table->id();
             $table->foreignIdFor(Service::class);
             $table->char('print_type', '4');
-            $table->boolean('after_thousand');
             $table->unsignedTinyInteger('calc_method')->default(0)->comment('0 - per triage, 1 - per item');
-            $table->integer('price');
+            $table->unsignedBigInteger('price_before_1k');
+            $table->unsignedBigInteger('price_after_1k')->nullable();
             $table->timestamps();
         });
     }
