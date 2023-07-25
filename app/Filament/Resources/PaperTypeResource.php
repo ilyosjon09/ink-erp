@@ -41,7 +41,8 @@ class PaperTypeResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label(__('Тип'))
+                TextColumn::make('name')->label(__('Тип')),
+                TextColumn::make('properties_count')->label(__('Количество цен'))
             ])
             ->filters([
                 //
@@ -68,10 +69,5 @@ class PaperTypeResource extends Resource
             'create' => Pages\CreatePaperType::route('/create'),
             'edit' => Pages\EditPaperType::route('/{record}/edit'),
         ];
-    }
-
-    public static function getEloquentQuery(): Builder
-    {
-        return parent::getEloquentQuery()->withCount('properties');
     }
 }

@@ -5,6 +5,7 @@ namespace App\Filament\Resources\PaperTypeResource\Pages;
 use App\Filament\Resources\PaperTypeResource;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListPaperTypes extends ListRecords
 {
@@ -15,5 +16,10 @@ class ListPaperTypes extends ListRecords
         return [
             Actions\CreateAction::make(),
         ];
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        return parent::getTableQuery()->withoutGlobalScopes()->withCount('properties');
     }
 }

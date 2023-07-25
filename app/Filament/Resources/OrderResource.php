@@ -65,7 +65,11 @@ class OrderResource extends Resource
                                     if (!$paperTypeId) {
                                         return [];
                                     }
-                                    return PaperProp::select('grammage')->where('paper_type_id', $paperTypeId)->groupBy('grammage')->get()->pluck('grammage', 'grammage');
+                                    return PaperProp::select('grammage')
+                                        ->where('paper_type_id', $paperTypeId)
+                                        ->groupBy('grammage')
+                                        ->get()
+                                        ->pluck('grammage', 'grammage');
                                 })
                                 ->required()
                                 ->reactive()
@@ -109,14 +113,14 @@ class OrderResource extends Resource
                                 ->reactive()
                                 ->required(),
                             Card::make([
-                                Placeholder::make('total_amount')->label('Всего штук')->content(fn ($get) => $get('amount_per_page') * $get('tirage')),
+                                Placeholder::make('total_amount')->label('Всего штук')->content(fn ($get) => number_format((int)$get('amount_per_page') * (int)$get('tirage'), 0, ',', ' ')),
                                 Placeholder::make('tirage_forecast')->label('Прогноз тираж')->content(function (Closure $get) {
                                     if ($get('order_amount') && $get('amount_per_page')) {
-                                        return floor($get('order_amount') / $get('amount_per_page'));
+                                        return number_format(floor((float)$get('order_amount') / (float)$get('amount_per_page')), 0, ',', ' ');
                                     }
                                     return 0;
                                 }),
-                                Placeholder::make('total_tirage')->label('Всего тираж')->content(fn ($get) => $get('tirage') + $get('additional_tirage')),
+                                Placeholder::make('total_tirage')->label('Всего тираж')->content(fn ($get) => number_format((int)$get('tirage') + (int)$get('additional_tirage'), 0, ',', ' ')),
                             ])->columns(3)
                         ]),
                         Fieldset::make(__('Услуги и формы'))->schema([
