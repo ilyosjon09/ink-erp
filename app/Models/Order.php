@@ -20,4 +20,13 @@ class Order extends Model
     {
         return $this->belongsTo(PaperType::class);
     }
+
+    public function services()
+    {
+        return $this->belongsToMany(Service::class);
+    }
+    public function printingForms()
+    {
+        return $this->belongsToMany(PrintingForm::class);
+    }
 }

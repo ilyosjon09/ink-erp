@@ -7,6 +7,8 @@ use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
 use App\Models\PaperProp;
 use App\Models\PaperType;
+use App\Models\PrintingForm;
+use App\Models\Service;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
@@ -29,6 +31,7 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Livewire\TemporaryUploadedFile;
 
 class OrderResource extends Resource
 {
@@ -47,7 +50,9 @@ class OrderResource extends Resource
                 Grid::make(2)->schema([
                     Card::make([
                         TextInput::make('item_name')->label(__('Название товара'))
-                            ->placeholder(__('Название товара'))->required()->columnSpanFull(),
+                            ->placeholder(__('Название товара'))
+                            ->required()
+                            ->columnSpanFull(),
 
                         // Paper
                         Fieldset::make(_('Бумага'))->schema([
@@ -77,6 +82,7 @@ class OrderResource extends Resource
                                 ->disabled(fn (callable $get) => !(bool) $get('paper_type')),
                             Select::make('size')
                                 ->label(__('Размер'))
+                                ->reactive()
                                 ->options(function (callable $get) {
                                     $grammage = $get('grammage');
                                     $paperTypeId = $get('paper_type');
@@ -120,7 +126,9 @@ class OrderResource extends Resource
                                     }
                                     return 0;
                                 }),
-                                Placeholder::make('total_tirage')->label('Всего тираж')->content(fn ($get) => number_format((int)$get('tirage') + (int)$get('additional_tirage'), 0, ',', ' ')),
+                                Placeholder::make('total_tirage')
+                                    ->label('Всего тираж')
+                                    ->content(fn ($get) => number_format((int)$get('tirage') + (int)$get('additional_tirage'), 0, ',', ' ')),
                             ])->columns(3)
                         ]),
                         Fieldset::make(__('Услуги и формы'))->schema([
@@ -136,38 +144,17 @@ class OrderResource extends Resource
                                 ->columnSpanFull(),
                             CheckboxList::make('services')
                                 ->label(__('Услуги'))
-                                ->options([
-                                    'Печать',
-                                    'Лак',
-                                    'Лак офсет',
-                                    'Ламинация Мат',
-                                    'Ламинация Глянц.',
-                                    'Выбороч. Лак',
-                                    'Тигель',
-                                    'Резка',
-                                    'Тиснение',
-                                    'Склейка',
-                                ])->required(),
-                            Grid::make(1)->schema([
-                                CheckboxList::make('printing_forms')
-                                    ->label(__('Формы'))
-                                    ->options([
-                                        'СТП',
-                                        'Выб колиб',
-                                        'Клище',
-                                    ])->required(),
-                                Radio::make('cutter_size')
-                                    ->label(__('Пичок'))
-                                    ->options([
-                                        'A2',
-                                        'A3',
-                                        'A4',
-                                        'A5',
-                                    ])
-                                    ->required()
-                                    ->default('four_zero')
-                                    ->inline()
-                            ])->columnSpan(1)
+                                ->relationship('services', 'name')
+                                ->required()
+                                ->columns(2)->columnSpanFull(),
+                            CheckboxList::make('printing_forms')
+                                ->label(__('Печатные Формы'))
+                                ->relationship('printingForms', 'name', fn (Builder $query) => $query->whereNot('name', 'like', '%Пичок%'))
+                                ->columns(2)
+                                ->columnSpanFull(),
+                            Select::make('cutters')
+                                ->label(__('Пичок'))
+                                ->options(fn () => PrintingForm::select('id', 'name')->where('name', 'like', '%Пичок%')->get()->pluck('name', 'name'))
                         ])
                     ])->columns(2),
                 ])->columnSpan(2),
@@ -196,8 +183,21 @@ class OrderResource extends Resource
                             ->label('Клиент'),
                     ]),
                     Card::make([
-                        FileUpload::make('item_image')->label(__('Изображение')),
-                    ])->extraAttributes(['class' => 'bg-red-500']),
+                        FileUpload::make('item_image')
+                            ->required()
+                            ->label(__('Изображение'))
+                            ->directory('order-images')
+                            ->image(),
+                    ]),
+                    Card::make([
+                        Placeholder::make('total')
+                            ->label(__('Всего к оплате'))
+                            ->content(function (callable $get) {
+                                $paperPrice = $get('size') ? (int) PaperProp::select('price')->find($get('size'))->price : 0;
+                                $totalTirage = (int)$get('tirage') + (int)$get('additional_tirage');
+                                return $totalTirage > 0 ? $totalTirage * $paperPrice : $paperPrice;
+                            })
+                    ]),
                 ])->columnSpan(1)
             ])->columns(3);
     }
