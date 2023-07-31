@@ -16,7 +16,7 @@ return new class extends Migration
     {
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
-            $table->string('code');
+            $table->unsignedInteger('code');
             $table->date('order_date');
             $table->string('item_name');
             $table->foreignIdFor(Client::class);
@@ -24,7 +24,8 @@ return new class extends Migration
             $table->integer('amount_per_paper');
             $table->string('printing_method')->index();
             $table->integer('tirage');
-            $table->integer('additional_triage');
+            $table->string('item_image');
+            $table->integer('additional_tirage');
             $table->foreignIdFor(User::class, 'created_by');
             $table->unsignedTinyInteger('status')->comment('0 - draft, 1 - in production, 2 - post production, 4 - done, 5 - cancelled');
             $table->timestamps();

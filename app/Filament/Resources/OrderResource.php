@@ -9,6 +9,7 @@ use App\Models\PaperProp;
 use App\Models\PaperType;
 use App\Models\PrintingForm;
 use App\Models\Service;
+use App\Models\ServicePrice;
 use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
@@ -31,6 +32,7 @@ use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\DB;
 use Livewire\TemporaryUploadedFile;
 
 class OrderResource extends Resource
@@ -58,7 +60,7 @@ class OrderResource extends Resource
                         Fieldset::make(_('Бумага'))->schema([
                             Select::make('paper_type')
                                 ->label(__('Тип бумаги'))
-                                ->relationship('paperType', 'name')
+                                ->options(fn () => PaperType::query()->select('id', 'name')->get()->pluck('name', 'id'))
                                 ->columnSpanFull()
                                 ->reactive()
                                 ->afterStateUpdated(fn (callable $set) => $set('grammage', null))
@@ -98,7 +100,7 @@ class OrderResource extends Resource
 
                         // Piece and tirage
                         Fieldset::make(__('Штук и тираж'))->schema([
-                            TextInput::make('amount_per_page')->type('number')
+                            TextInput::make('amount_per_paper')->type('number')
                                 ->label(__('Штук на листе'))
                                 ->minValue(0)
                                 ->reactive()
@@ -119,10 +121,10 @@ class OrderResource extends Resource
                                 ->reactive()
                                 ->required(),
                             Card::make([
-                                Placeholder::make('total_amount')->label('Всего штук')->content(fn ($get) => number_format((int)$get('amount_per_page') * (int)$get('tirage'), 0, ',', ' ')),
+                                Placeholder::make('total_amount')->label('Всего штук')->content(fn ($get) => number_format((int)$get('amount_per_paper') * (int)$get('tirage'), 0, ',', ' ')),
                                 Placeholder::make('tirage_forecast')->label('Прогноз тираж')->content(function (Closure $get) {
-                                    if ($get('order_amount') && $get('amount_per_page')) {
-                                        return number_format(floor((float)$get('order_amount') / (float)$get('amount_per_page')), 0, ',', ' ');
+                                    if ($get('order_amount') && $get('amount_per_paper')) {
+                                        return number_format(floor((float)$get('order_amount') / (float)$get('amount_per_paper')), 0, ',', ' ');
                                     }
                                     return 0;
                                 }),
@@ -135,26 +137,32 @@ class OrderResource extends Resource
                             Radio::make('print_type')
                                 ->label(__('Краска'))
                                 ->options([
-                                    'four_zero' => '4+0',
-                                    'four_four' => '4+4',
+                                    '4+0' => '4+0',
+                                    '4+4' => '4+4',
                                 ])
                                 ->required()
-                                ->default('four_zero')
+                                ->reactive()
+                                ->default('4+0')
                                 ->inline()
                                 ->columnSpanFull(),
                             CheckboxList::make('services')
+                                ->id('services')
                                 ->label(__('Услуги'))
-                                ->relationship('services', 'name')
+                                ->options(fn () => Service::query()->select('id', 'name')->get()->pluck('name', 'id'))
                                 ->required()
+                                ->reactive()
                                 ->columns(2)->columnSpanFull(),
                             CheckboxList::make('printing_forms')
+                                ->id('printing_forms')
                                 ->label(__('Печатные Формы'))
-                                ->relationship('printingForms', 'name', fn (Builder $query) => $query->whereNot('name', 'like', '%Пичок%'))
+                                ->reactive()
+                                ->options(fn () => PrintingForm::query()->select('id', 'name')->whereNot('name', 'like', '%Пичок%')->get()->pluck('name', 'id'))
                                 ->columns(2)
                                 ->columnSpanFull(),
-                            Select::make('cutters')
+                            Select::make('cutter')
                                 ->label(__('Пичок'))
-                                ->options(fn () => PrintingForm::select('id', 'name')->where('name', 'like', '%Пичок%')->get()->pluck('name', 'name'))
+                                ->reactive()
+                                ->options(fn () => PrintingForm::select('id', 'name')->where('name', 'like', '%Пичок%')->get()->pluck('name', 'id'))
                         ])
                     ])->columns(2),
                 ])->columnSpan(2),
@@ -162,7 +170,7 @@ class OrderResource extends Resource
                 // Side panel
                 Grid::make(1)->schema([
                     Card::make([
-                        DatePicker::make('date')->label(__('Дата'))->default(now())->required(),
+                        DatePicker::make('created_at')->label(__('Дата'))->default(now())->required(),
                         Select::make('client_id')
                             ->searchable(true)
                             ->required()
@@ -192,11 +200,46 @@ class OrderResource extends Resource
                     Card::make([
                         Placeholder::make('total')
                             ->label(__('Всего к оплате'))
-                            ->content(function (callable $get) {
+                            ->content(function (callable $get, callable $set) {
                                 $paperPrice = $get('size') ? (int) PaperProp::select('price')->find($get('size'))->price : 0;
-                                $totalTirage = (int)$get('tirage') + (int)$get('additional_tirage');
-                                return $totalTirage > 0 ? $totalTirage * $paperPrice : $paperPrice;
-                            })
+                                $servicesPrice =  0;
+                                $tirage = (int)$get('tirage');
+                                $totalAmount = (int)$get('order_amount') * $tirage;
+                                $totalTirage =  $tirage + (int)$get('additional_tirage');
+                                $set('perPiece', 'sava');
+                                $formPrices = empty($get('printing_forms')) ? 0 :  PrintingForm::query()
+                                    ->when(
+                                        $get('print_type') == '4+4',
+                                        fn (Builder $query) => $query->select('double_four_price as price'),
+                                        fn (Builder $query) => $query->select('four_zero_price as price')
+                                    )->whereIn('id', $get('printing_forms'))
+                                    ->get()
+                                    ->sum('price');
+                                $cutterPrice = $get('cutter') ? PrintingForm::query()
+                                    ->when(
+                                        $get('print_type') == '4+4',
+                                        fn (Builder $query) => $query->select('double_four_price as price'),
+                                        fn (Builder $query) => $query->select('four_zero_price as price')
+                                    )->find($get('cutter'))->price : 0;
+                                if (!empty($get('services'))) {
+                                    $servicesPrice = ServicePrice::query()
+                                        ->whereIn('service_id', $get('services'))
+                                        ->where('print_type', $get('print_type'))
+                                        ->when(
+                                            $tirage < 1000,
+                                            fn (Builder $query) => $query->select('price_before_1k as price'),
+                                            fn (Builder $query) => $query->select('price_after_1k as price')
+                                        )->get()->sum('price');
+                                }
+                                return $totalTirage == 0 || empty($get('services')) ?
+                                    0 : ($totalTirage > 0 ? $totalTirage * $paperPrice : $paperPrice)
+                                    + ($tirage < 1000 ? $servicesPrice : $servicesPrice * $totalTirage)
+                                    + ($get('print_type') == '4+4' ? 300000 : 200000)
+                                    + ($formPrices + $cutterPrice);
+                            })->reactive(),
+                        Placeholder::make('perPiece')->id('per_piece')
+                            ->reactive()
+                            ->label('Цена за штуку')
                     ]),
                 ])->columnSpan(1)
             ])->columns(3);

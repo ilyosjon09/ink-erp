@@ -15,9 +15,4 @@ class Service extends Model
     {
         return $this->hasMany(ServicePrice::class);
     }
-
-    public function orders()
-    {
-        return $this->belongsToMany(Order::class);
-    }
 }

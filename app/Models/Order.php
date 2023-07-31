@@ -10,7 +10,9 @@ class Order extends Model
     use HasFactory;
 
     protected $guarded = [];
-
+    protected $casts = [
+        'created_at' => 'date',
+    ];
     public function client()
     {
         return $this->belongsTo(Client::class);
@@ -21,12 +23,13 @@ class Order extends Model
         return $this->belongsTo(PaperType::class);
     }
 
-    public function services()
+    public function servicePrices()
     {
-        return $this->belongsToMany(Service::class);
+        return $this->belongsToMany(ServicePrice::class)->withTimestamps();
     }
+
     public function printingForms()
     {
-        return $this->belongsToMany(PrintingForm::class);
+        return $this->belongsToMany(PrintingForm::class)->withTimestamps();
     }
 }

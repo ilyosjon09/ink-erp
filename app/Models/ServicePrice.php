@@ -19,4 +19,9 @@ class ServicePrice extends Model
     {
         return $this->belongsTo(Service::class);
     }
+
+    public function orders()
+    {
+        return $this->belongsToMany(Order::class)->withTimestamps();
+    }
 }

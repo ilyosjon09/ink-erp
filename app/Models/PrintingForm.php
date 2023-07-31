@@ -10,4 +10,9 @@ class PrintingForm extends Model
     use HasFactory;
 
     protected $guarded = [];
+
+    protected function orders()
+    {
+        return $this->belongsToMany(Order::class)->withTimestamps();
+    }
 }
