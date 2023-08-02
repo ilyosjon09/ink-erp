@@ -32,8 +32,13 @@ class PricesRelationManager extends RelationManager
     {
         return $form
             ->schema([
-                TextInput::make('price')
-                    ->label(__('Цена'))
+                TextInput::make('price_before_1k')
+                    ->label(__('Цена до 1000'))
+                    ->type('number')
+                    ->minValue(0)
+                    ->required(),
+                TextInput::make('price_after_1k')
+                    ->label(__('Цена после 1000'))
                     ->type('number')
                     ->minValue(0)
                     ->required(),
@@ -60,9 +65,6 @@ class PricesRelationManager extends RelationManager
                                 ->default(0)
                                 ->helperText(__('Подсчитать для каждого тиража или для каждого листа бумаги?')),
                         ])->columnSpan(1),
-                        Toggle::make('after_thousand')
-                            ->label(__('после 1000'))
-                            ->default(false),
                     ]),
             ]);
     }
@@ -72,7 +74,7 @@ class PricesRelationManager extends RelationManager
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('price')
-                    ->formatStateUsing(fn (string $state): string => number_format($state, 0, ',', ' '))
+                    ->formatStateUsing(fn ($state): string => $state ? number_format($state, 0, ',', ' ') : '')
                     ->label(__('Цена')),
                 Tables\Columns\TextColumn::make('print_type')
                     ->label(__('Краска')),

@@ -181,8 +181,11 @@ class OrderResource extends Resource
                                     ->required(),
                                 Fieldset::make('contacts')->schema([
                                     TextInput::make('contacts.phone_primary')->label(__('Основной номер телефона'))
+                                        ->mask(fn (TextInput\Mask $mask) => $mask->pattern('+{998}000000000'))
                                         ->required(),
-                                    TextInput::make('contacts.phone_secondary')->label(__('Дополнительный номер телефона')),
+                                    TextInput::make('contacts.phone_secondary')
+                                        ->mask(fn (TextInput\Mask $mask) => $mask->pattern('+{998}000000000'))
+                                        ->label(__('Дополнительный номер телефона')),
                                 ])->label('Контактная информация')
                             ])
                             ->preload()
