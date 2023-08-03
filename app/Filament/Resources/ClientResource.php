@@ -56,6 +56,8 @@ class ClientResource extends Resource
                     ->label(__('Назание')),
                 TextColumn::make('rep_name')
                     ->label(__('Контактое лицо')),
+                TextColumn::make('contacts.phone_primary')->label(__('Тел. номер')),
+                TextColumn::make('contacts.phone_secondary')->label(__('Доп тел. номер')),
             ])
             ->filters([
                 //
