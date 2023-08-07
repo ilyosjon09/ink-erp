@@ -14,12 +14,15 @@ return new class extends Migration
     {
         Schema::create('service_prices', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Service::class);
+            $table->foreignIdFor(Service::class)->constrained()->cascadeOnDelete();
             $table->char('print_type', '4');
             $table->unsignedTinyInteger('calc_method')->default(0)->comment('0 - per triage, 1 - per item');
             $table->unsignedBigInteger('price_before_1k');
             $table->unsignedBigInteger('price_after_1k')->nullable();
             $table->timestamps();
+
+            $table->index('service_id');
+            $table->index('print_type');
         });
     }
 

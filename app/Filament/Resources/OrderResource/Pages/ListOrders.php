@@ -5,6 +5,7 @@ namespace App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\ListRecords;
+use Illuminate\Database\Eloquent\Builder;
 
 class ListOrders extends ListRecords
 {
@@ -15,5 +16,12 @@ class ListOrders extends ListRecords
         return [
             Actions\CreateAction::make(),
         ];
+    }
+
+    protected function getTableQuery(): Builder
+    {
+        $selectStatement = "`id`, CONCAT(code, DATE_FORMAT(created_at, '-%m-%Y')) as reg_number, `item_name`, `client_id`, `amount_per_paper`, `paper_prop_id`, `printing_method`, `tirage`, `item_image`, `additional_tirage`, `created_by`, `created_at`, `status`, `updated_at`";
+        return parent::getTableQuery()->withoutGlobalScopes()
+            ->selectRaw($selectStatement);
     }
 }

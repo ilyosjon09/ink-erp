@@ -14,11 +14,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_service_price', function (Blueprint $table) {
-            $table->foreignIdFor(Order::class);
+            $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(ServicePrice::class);
             $table->integer('price');
             $table->boolean('after_thousand');
             $table->timestamps();
+
+            $table->index('order_id');
+            $table->index('service_price_id');
         });
     }
 

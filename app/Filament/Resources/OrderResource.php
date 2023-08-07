@@ -29,6 +29,7 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -252,7 +253,15 @@ class OrderResource extends Resource
     {
         return $table
             ->columns([
-                //
+                TextColumn::make('reg_number')
+                    ->label(__('Рег. номер')),
+                TextColumn::make('item_name')
+                    ->label(__('Назваиние товара')),
+                TextColumn::make('amount_per_paper')
+                    ->label(__('Штук за лист')),
+                TextColumn::make('tirage')
+                    ->label(__('Тираж')),
+
             ])
             ->filters([
                 //

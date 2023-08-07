@@ -14,11 +14,14 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('order_printing_form', function (Blueprint $table) {
-            $table->foreignIdFor(Order::class);
+            $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(PrintingForm::class);
             $table->integer('price');
             $table->boolean('is_double_four')->default(false);
             $table->timestamps();
+
+            $table->index('order_id');
+            $table->index('printing_form_id');
         });
     }
 

@@ -17,12 +17,11 @@ return new class extends Migration
         Schema::create('orders', function (Blueprint $table) {
             $table->id();
             $table->unsignedInteger('code');
-            $table->date('order_date');
             $table->string('item_name');
             $table->foreignIdFor(Client::class);
             $table->foreignIdFor(PaperProp::class);
             $table->integer('amount_per_paper');
-            $table->string('printing_method')->index();
+            $table->string('printing_type')->index();
             $table->integer('tirage');
             $table->string('item_image');
             $table->integer('additional_tirage');
@@ -30,6 +29,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('status')->comment('0 - draft, 1 - in production, 2 - post production, 4 - done, 5 - cancelled');
             $table->timestamps();
 
+            $table->index('printing_method');
             $table->unique(['code', 'order_date']);
         });
     }
