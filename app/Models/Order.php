@@ -32,4 +32,9 @@ class Order extends Model
     {
         return $this->belongsToMany(PrintingForm::class)->withTimestamps();
     }
+
+    public function maker()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
 }
