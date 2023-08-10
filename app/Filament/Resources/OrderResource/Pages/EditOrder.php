@@ -16,4 +16,16 @@ class EditOrder extends EditRecord
             Actions\DeleteAction::make(),
         ];
     }
+
+    protected function mutateFormDataBeforeFill(array $data): array
+    {
+        $data['services'] = $this->record->servicePrices->pluck('service_id');
+        $data['print_type'] = $this->record->printing_method;
+        $data['printing_forms'] =  $this->record->printingForms()
+            ->whereNot('name', 'like', '%Пичок%')
+            ->get()
+            ->pluck('pivot.printing_form_id');
+        // $data['cutter'] =  $this->record->printingForms()->where('name', 'like', '%Пичок%')->get()->pluck('pivot.printing_form_id', 'pivot.price');
+        return $data;
+    }
 }

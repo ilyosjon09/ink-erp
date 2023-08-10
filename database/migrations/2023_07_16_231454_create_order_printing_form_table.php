@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(PrintingForm::class);
             $table->integer('price');
-            $table->boolean('is_double_four')->default(false);
             $table->timestamps();
 
             $table->index('order_id');
