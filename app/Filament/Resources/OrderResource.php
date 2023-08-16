@@ -152,7 +152,13 @@ class OrderResource extends Resource
                                 ->options(fn () => Service::query()->select('id', 'name')->get()->pluck('name', 'id'))
                                 ->required()
                                 ->reactive()
-                                ->columns(2)->columnSpanFull(),
+                                ->columns(2),
+                            Radio::make('profit_percentage')->options([
+                                '10' => '10%',
+                                '20' => '20%',
+                                '30' => '30%',
+                            ])->label(__('.'))
+                                ->required(),
                             CheckboxList::make('printing_forms')
                                 ->id('printing_forms')
                                 ->label(__('Печатные Формы'))
@@ -171,7 +177,7 @@ class OrderResource extends Resource
                 // Side panel
                 Grid::make(1)->schema([
                     Card::make([
-                        DatePicker::make('created_at')->label(__('Дата'))->default(now())->required(),
+                        DatePicker::make('created_at')->label(__('Дата'))->default(now())->required()->disabled(),
                         Select::make('client_id')
                             ->searchable(true)
                             ->required()
