@@ -35,7 +35,6 @@ return new class extends Migration
             $table->timestamp('processesed_at');
             $table->timestamps();
 
-            $table->index('printing_type');
             $table->unique(['code', 'created_at']);
         });
     }

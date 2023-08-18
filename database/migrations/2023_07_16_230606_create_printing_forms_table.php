@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->integer('four_zero_price');
-            $table->integer('double_four_price');
+            $table->integer('double_four_price')->nullable();
             $table->timestamps();
         });
     }

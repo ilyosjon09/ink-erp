@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignIdFor(Order::class)->constrained()->cascadeOnDelete();
             $table->foreignIdFor(ServicePrice::class);
             $table->integer('price');
-            $table->boolean('after_thousand');
             $table->timestamps();
 
             $table->index('order_id');
