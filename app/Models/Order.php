@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\OrderStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -10,9 +11,12 @@ class Order extends Model
     use HasFactory;
 
     protected $guarded = [];
+
     protected $casts = [
         'created_at' => 'date',
+        'status' => OrderStatus::class,
     ];
+
     public function client()
     {
         return $this->belongsTo(Client::class);
@@ -36,5 +40,10 @@ class Order extends Model
     public function maker()
     {
         return $this->belongsTo(User::class, 'created_by');
+    }
+
+    public function profitPercentage()
+    {
+        return $this->belongsTo(ProfitPercentage::class);
     }
 }

@@ -22,17 +22,17 @@ return new class extends Migration
             $table->foreignIdFor(Client::class);
             $table->foreignIdFor(PaperProp::class);
             $table->integer('amount_per_paper');
-            $table->string('printing_type')->index();
+            $table->string('print_type')->index();
             $table->integer('tirage');
             $table->string('item_image');
             $table->integer('additional_tirage');
             $table->foreignIdFor(ProfitPercentage::class);
-            $table->unsignedTinyInteger('status')->comment('0 - draft, 1 - in production, 2 - post production, 4 - done, 5 - cancelled');
+            $table->unsignedTinyInteger('status')->comment('0 - new, 1 - in printing shop, 2 - in assembly shop, 4 - completed, 5 - canceled');
             $table->foreignIdFor(User::class, 'created_by');
             $table->foreignIdFor(User::class, 'printed_by')->nullable();
             $table->foreignIdFor(User::class, 'processed_by')->nullable();
-            $table->timestamp('printed_at');
-            $table->timestamp('processesed_at');
+            $table->timestamp('printed_at')->nullable();
+            $table->timestamp('processesed_at')->nullable();
             $table->timestamps();
 
             $table->unique(['code', 'created_at']);

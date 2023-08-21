@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources\OrderResource\Pages;
 
+use App\Enums\OrderStatus;
 use App\Filament\Resources\OrderResource;
 use App\Models\Order;
 use App\Models\PrintingForm;
@@ -17,9 +18,8 @@ class CreateOrder extends CreateRecord
     public function mutateFormDataBeforeCreate(array $data): array
     {
         $today = today();
-        $lastOrder = Order::whereYear('order_date', $today->year)->whereMonth('order_date', $today->month)->latest('code')->first();
+        $lastOrder = Order::whereYear('created_at', $today->year)->whereMonth('created_at', $today->month)->latest('code')->first();
         $data['code'] = $lastOrder ? (int)$lastOrder->code + 1 : 1;
-        $data['order_date'] = $today;
         return $data;
     }
 
@@ -27,16 +27,16 @@ class CreateOrder extends CreateRecord
     {
         $data = [
             'code' => $data['code'],
-            'order_date' => $data['order_date'],
             'item_name' => $data['item_name'],
             'client_id' => $data['client_id'],
             'paper_prop_id' => $data['size'],
             'amount_per_paper' => $data['amount_per_paper'],
-            'printing_method' => $data['print_type'],
+            'print_type' => $data['print_type'],
             'tirage' => $data['tirage'],
+            'profit_percentage_id' => $data['profit_percentage'],
             'additional_tirage' => $data['additional_tirage'],
             'created_by' => auth()->user()->id,
-            'status' => 0,
+            'status' => OrderStatus::NEW->value,
             'item_image' => $data['item_image'],
         ];
         return static::getModel()::create($data);
@@ -58,7 +58,7 @@ class CreateOrder extends CreateRecord
         $sd = [];
 
         $servicePrices->each(function ($service) use (&$sd) {
-            $sd[$service->id] = ['price' => $service->price, 'after_thousand' => $this->data['tirage'] >= 1000];
+            $sd[$service->id] = ['price' => $service->price];
         });
 
         $order->servicePrices()->sync($sd);
@@ -78,7 +78,6 @@ class CreateOrder extends CreateRecord
         $printingForms = $printingForms->each(function ($printingForm) use (&$pd) {
             $pd[$printingForm->id] = [
                 'price' => $printingForm->price,
-                'is_double_four' => $this->data['print_type'] == '4+4'
             ];
         });
 

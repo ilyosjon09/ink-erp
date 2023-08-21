@@ -8,6 +8,7 @@ use App\Models\Order;
 use App\Models\PaperProp;
 use App\Models\PaperType;
 use App\Models\PrintingForm;
+use App\Models\ProfitPercentage;
 use App\Models\Service;
 use App\Models\ServicePrice;
 use Closure;
@@ -35,6 +36,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\DB;
 use Livewire\TemporaryUploadedFile;
+
+use function PHPUnit\Framework\callback;
 
 class OrderResource extends Resource
 {
@@ -153,11 +156,7 @@ class OrderResource extends Resource
                                 ->required()
                                 ->reactive()
                                 ->columns(2),
-                            Radio::make('profit_percentage')->options([
-                                '10' => '10%',
-                                '20' => '20%',
-                                '30' => '30%',
-                            ])->label(__('.'))
+                            Radio::make('profit_percentage')->options(fn () => ProfitPercentage::selectRaw("id, CONCAT(percentage,'%') as perc")->get()->pluck('perc', 'id'))->label(__('.'))
                                 ->required(),
                             CheckboxList::make('printing_forms')
                                 ->id('printing_forms')

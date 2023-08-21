@@ -20,7 +20,7 @@ class ListOrders extends ListRecords
 
     protected function getTableQuery(): Builder
     {
-        $selectStatement = "`id`, CONCAT(code, DATE_FORMAT(created_at, '-%m-%Y')) as reg_number, `item_name`, `client_id`, `amount_per_paper`, `paper_prop_id`, `printing_method`, `tirage`, `item_image`, `additional_tirage`, `created_by`, `created_at`, `status`, `updated_at`";
+        $selectStatement = "`id`, CONCAT(code, DATE_FORMAT(`created_at`, '-%m-%Y')) as reg_number, `item_name`, `client_id`, `amount_per_paper`, `paper_prop_id`, `print_type`, `tirage`, `item_image`, `additional_tirage`, `created_by`, `created_at`, `status`, `updated_at`";
         return parent::getTableQuery()->withoutGlobalScopes()
             ->selectRaw($selectStatement);
     }
