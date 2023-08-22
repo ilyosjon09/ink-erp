@@ -242,7 +242,7 @@ return [
         'footer' => [
             'should_show_logo' => false,
         ],
-        'max_content_width' => '8xl',
+        'max_content_width' => '7xl',
         'notifications' => [
             'vertical_alignment' => 'top',
             'alignment' => 'right',

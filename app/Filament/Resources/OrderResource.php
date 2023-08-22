@@ -51,7 +51,7 @@ class OrderResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form->
+        return $form
             ->schema([
                 Grid::make(2)->schema([
                     Card::make([
@@ -108,24 +108,45 @@ class OrderResource extends Resource
                                 ->label(__('Штук на листе'))
                                 ->minValue(0)
                                 ->reactive()
+                                ->afterStateUpdated(function (Closure $set, Closure $get, $state) {
+                                    if ($get('state') > 0) {
+                                        $set(
+                                            'tirage_forecast',
+                                            floor((float)$get('order_amount') / (float)$state)
+                                        );
+                                    }
+                                    $set('total_amount', (int)$get('tirage') * (int)$state);
+                                })
                                 ->required(),
                             TextInput::make('order_amount')->type('number')
                                 ->label(__('Заказ штук'))
                                 ->minValue(0)
-                                ->afterStateUpdated(function (Closure $set, Closure $get, $state) {
-                                    $set('total_amount', (int)$get('amount_per_paper') * (int)$get('tirage'));
-                                })
                                 ->reactive()
+                                ->afterStateUpdated(function (Closure $set, Closure $get, $state) {
+                                    if ($get('amount_per_paper') > 0) {
+                                        $set(
+                                            'tirage_forecast',
+                                            floor((float)$state / (float)$get('amount_per_paper'))
+                                        );
+                                    }
+                                })
                                 ->required(),
                             TextInput::make('tirage')->type('number')
                                 ->label(__('Тираж'))
                                 ->minValue(0)
                                 ->reactive()
+                                ->afterStateUpdated(function (Closure $set, Closure $get, $state) {
+                                    $set('total_amount', (int)$get('amount_per_paper') * (int)$state);
+                                    $set('total_tirage',  (int)$state + (int)$get('additional_tirage'));
+                                })
                                 ->required(),
                             TextInput::make('additional_tirage')->type('number')
                                 ->label(__('Дополнительный тираж'))
                                 ->minValue(0)
                                 ->reactive()
+                                ->afterStateUpdated(function (Closure $set, Closure $get, $state) {
+                                    $set('total_tirage',  (int)$state + (int)$get('tirage'));
+                                })
                                 ->required(),
                             Card::make([
                                 TextInput::make('total_amount')
@@ -134,19 +155,21 @@ class OrderResource extends Resource
                                 Placeholder::make('total_amount_label')
                                     ->label('Всего штук')
                                     ->content(function (callable $get) {
-                                        dump($get('total_amount'));
                                         return number_format($get('total_amount'), 0, ',', ' ');
                                     })
                                     ->reactive(),
-                                Placeholder::make('tirage_forecast')->label('Прогноз тираж')->content(function (Closure $get) {
-                                    if ($get('order_amount') && $get('amount_per_paper')) {
-                                        return number_format(floor((float)$get('order_amount') / (float)$get('amount_per_paper')), 0, ',', ' ');
-                                    }
-                                    return 0;
+                                TextInput::make('tirage_forecast')
+                                    ->reactive()
+                                    ->hidden(),
+                                Placeholder::make('tirage_forecast_label')->label('Прогноз тираж')->content(function (Closure $get) {
+                                    return number_format($get('tirage_forecast'), 0, ',', ' ');
                                 }),
-                                Placeholder::make('total_tirage')
+                                TextInput::make('total_tirage')
+                                    ->reactive()
+                                    ->hidden(),
+                                Placeholder::make('total_tirage_label')
                                     ->label('Всего тираж')
-                                    ->content(fn ($get) => number_format((int)$get('tirage') + (int)$get('additional_tirage'), 0, ',', ' ')),
+                                    ->content(fn (Closure $get) => number_format($get('total_tirage'), 0, ',', ' ')),
                             ])->columns(3)
                         ]),
                         Fieldset::make(__('Услуги и формы'))->schema([
