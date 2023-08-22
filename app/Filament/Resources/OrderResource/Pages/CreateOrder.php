@@ -14,7 +14,6 @@ use Illuminate\Database\Eloquent\Model;
 class CreateOrder extends CreateRecord
 {
     protected static string $resource = OrderResource::class;
-
     public function mutateFormDataBeforeCreate(array $data): array
     {
         $today = today();

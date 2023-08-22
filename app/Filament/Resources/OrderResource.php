@@ -51,7 +51,7 @@ class OrderResource extends Resource
 
     public static function form(Form $form): Form
     {
-        return $form
+        return $form->
             ->schema([
                 Grid::make(2)->schema([
                     Card::make([
@@ -112,6 +112,9 @@ class OrderResource extends Resource
                             TextInput::make('order_amount')->type('number')
                                 ->label(__('Заказ штук'))
                                 ->minValue(0)
+                                ->afterStateUpdated(function (Closure $set, Closure $get, $state) {
+                                    $set('total_amount', (int)$get('amount_per_paper') * (int)$get('tirage'));
+                                })
                                 ->reactive()
                                 ->required(),
                             TextInput::make('tirage')->type('number')
@@ -125,7 +128,16 @@ class OrderResource extends Resource
                                 ->reactive()
                                 ->required(),
                             Card::make([
-                                Placeholder::make('total_amount')->label('Всего штук')->content(fn ($get) => number_format((int)$get('amount_per_paper') * (int)$get('tirage'), 0, ',', ' ')),
+                                TextInput::make('total_amount')
+                                    ->reactive()
+                                    ->hidden(),
+                                Placeholder::make('total_amount_label')
+                                    ->label('Всего штук')
+                                    ->content(function (callable $get) {
+                                        dump($get('total_amount'));
+                                        return number_format($get('total_amount'), 0, ',', ' ');
+                                    })
+                                    ->reactive(),
                                 Placeholder::make('tirage_forecast')->label('Прогноз тираж')->content(function (Closure $get) {
                                     if ($get('order_amount') && $get('amount_per_paper')) {
                                         return number_format(floor((float)$get('order_amount') / (float)$get('amount_per_paper')), 0, ',', ' ');
@@ -209,13 +221,13 @@ class OrderResource extends Resource
                     Card::make([
                         Placeholder::make('total')
                             ->label(__('Всего к оплате'))
+                            ->reactive()
                             ->content(function (callable $get, callable $set) {
                                 $paperPrice = $get('size') ? (int) PaperProp::select('price')->find($get('size'))->price : 0;
                                 $servicesPrice =  0;
                                 $tirage = (int)$get('tirage');
                                 $totalAmount = (int)$get('order_amount') * $tirage;
                                 $totalTirage =  $tirage + (int)$get('additional_tirage');
-                                $set('perPiece', 'sava');
                                 $formPrices = empty($get('printing_forms')) ? 0 :  PrintingForm::query()
                                     ->when(
                                         $get('print_type') == '4+4',
@@ -240,13 +252,25 @@ class OrderResource extends Resource
                                             fn (Builder $query) => $query->select('price_after_1k as price')
                                         )->get()->sum('price');
                                 }
-                                return $totalTirage == 0 || empty($get('services')) ?
+
+
+                                $result = $totalTirage == 0 || empty($get('services')) ?
                                     0 : ($totalTirage > 0 ? $totalTirage * $paperPrice : $paperPrice)
                                     + ($tirage < 1000 ? $servicesPrice : $servicesPrice * $totalTirage)
                                     + ($get('print_type') == '4+4' ? 300000 : 200000)
                                     + ($formPrices + $cutterPrice);
-                            })->reactive(),
-                        Placeholder::make('perPiece')->id('per_piece')
+                                if ($get('total_amount') > 0) {
+                                    $set('per_piece', $result / $get('total_amount'));
+                                }
+                                return $result;
+                            }),
+                        TextInput::make('per_piece')
+                            ->default(0)
+                            ->hidden(),
+                        Placeholder::make('per_piece_label')->id('per_piece')
+                            ->content(function (callable $get) {
+                                return $get('per_piece');
+                            })
                             ->reactive()
                             ->label('Цена за штуку')
                     ]),
