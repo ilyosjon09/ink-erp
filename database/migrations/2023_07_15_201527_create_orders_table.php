@@ -21,6 +21,8 @@ return new class extends Migration
             $table->string('item_name');
             $table->foreignIdFor(Client::class);
             $table->foreignIdFor(PaperProp::class);
+            $table->integer('paper_price');
+            $table->integer('amount');
             $table->integer('amount_per_paper');
             $table->string('print_type')->index();
             $table->integer('tirage');

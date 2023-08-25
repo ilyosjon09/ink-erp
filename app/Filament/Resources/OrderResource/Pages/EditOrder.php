@@ -3,6 +3,7 @@
 namespace App\Filament\Resources\OrderResource\Pages;
 
 use App\Filament\Resources\OrderResource;
+use App\Models\PaperProp;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -19,8 +20,13 @@ class EditOrder extends EditRecord
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
+        $paperProp = PaperProp::find($this->record->paper_prop_id);
         $data['services'] = $this->record->servicePrices->pluck('service_id');
-        $data['print_type'] = $this->record->printing_method;
+        $data['print_type'] = $this->record->print_type;
+        $data['paper_type'] = $paperProp->paper_type_id;
+        $data['grammage'] = $paperProp->grammage;
+        $data['size'] = $paperProp->id;
+
         $data['printing_forms'] =  $this->record->printingForms()
             ->whereNot('name', 'like', '%Пичок%')
             ->get()
