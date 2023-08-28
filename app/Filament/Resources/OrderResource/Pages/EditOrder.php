@@ -26,12 +26,19 @@ class EditOrder extends EditRecord
         $data['paper_type'] = $paperProp->paper_type_id;
         $data['grammage'] = $paperProp->grammage;
         $data['size'] = $paperProp->id;
+        $data['order_amount'] = $this->record->amount;
+
+        $data['total_amount'] = $this->record->tirage * $this->record->amount_per_paper;
+        $data['tirage_forecast'] = floor((float)$this->record->amount / (float)$this->record->amount_per_paper);
+        $data['total_tirage'] = $this->record->tirage + $this->record->additional_tirage;
 
         $data['printing_forms'] =  $this->record->printingForms()
             ->whereNot('name', 'like', '%Пичок%')
             ->get()
             ->pluck('pivot.printing_form_id');
-        // $data['cutter'] =  $this->record->printingForms()->where('name', 'like', '%Пичок%')->get()->pluck('pivot.printing_form_id', 'pivot.price');
+        $cutterId = $this->record->printingForms()->where('name', 'like', '%Пичок%')->get();
+        $data['cutter'] =  dd($cutterId->first());
+        $data['cutter'] =  dd();
         return $data;
     }
 }

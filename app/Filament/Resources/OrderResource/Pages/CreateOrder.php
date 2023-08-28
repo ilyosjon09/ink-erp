@@ -5,6 +5,7 @@ namespace App\Filament\Resources\OrderResource\Pages;
 use App\Enums\OrderStatus;
 use App\Filament\Resources\OrderResource;
 use App\Models\Order;
+use App\Models\PaperProp;
 use App\Models\PrintingForm;
 use App\Models\ServicePrice;
 use Filament\Pages\Actions;
@@ -30,7 +31,9 @@ class CreateOrder extends CreateRecord
             'client_id' => $data['client_id'],
             'paper_prop_id' => $data['size'],
             'amount_per_paper' => $data['amount_per_paper'],
+            'amount' => $data['order_amount'],
             'print_type' => $data['print_type'],
+            'paper_price' => PaperProp::find($data['size'])->price,
             'tirage' => $data['tirage'],
             'profit_percentage_id' => $data['profit_percentage'],
             'additional_tirage' => $data['additional_tirage'],
