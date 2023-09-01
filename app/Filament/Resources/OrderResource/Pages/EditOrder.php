@@ -37,8 +37,7 @@ class EditOrder extends EditRecord
             ->get()
             ->pluck('pivot.printing_form_id');
         $cutterId = $this->record->printingForms()->where('name', 'like', '%Пичок%')->get();
-        $data['cutter'] =  dd($cutterId->first());
-        $data['cutter'] =  dd();
+        $data['cutter'] =  $cutterId->first()->id;
         return $data;
     }
 }
