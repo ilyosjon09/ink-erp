@@ -35,6 +35,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 use Livewire\TemporaryUploadedFile;
 
 use function PHPUnit\Framework\callback;
@@ -191,7 +192,12 @@ class OrderResource extends Resource
                                 ->required()
                                 ->reactive()
                                 ->columns(2),
-                            Radio::make('profit_percentage')->options(fn () => ProfitPercentage::selectRaw("id, CONCAT(percentage,'%') as perc")->get()->pluck('perc', 'id'))->label(__('.'))
+                            Radio::make('profit_percentage')
+                                ->options(
+                                    fn () => ProfitPercentage::selectRaw("id, CONCAT(percentage,'%') as perc")->get()->pluck('perc', 'id')
+                                )
+                                ->label(__('.'))
+                                ->reactive()
                                 ->required(),
                             CheckboxList::make('printing_forms')
                                 ->id('printing_forms')
@@ -285,7 +291,14 @@ class OrderResource extends Resource
                                 if ($get('total_amount') > 0) {
                                     $set('per_piece', $result / $get('total_amount'));
                                 }
-                                return $result;
+                                if ($get('profit_percentage')) {
+
+                                    $profitPercentage = ProfitPercentage::findOrFail($get('profit_percentage'))->percentage;
+                                    $profit = ($result / 100) * $profitPercentage;
+                                    $result += $profit;
+                                }
+                                $result = number_format(ceil($result), 0, ', ', ' ');
+                                return new HtmlString("<span class=\"font-mono\">{$result}</span>");
                             }),
                         TextInput::make('per_piece')
                             ->default(0)
@@ -306,7 +319,8 @@ class OrderResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('reg_number')
-                    ->label(__('Рег. номер')),
+                    ->label(__('Рег. номер'))
+                    ->extraAttributes(['class' => 'font-mono']),
                 TextColumn::make('item_name')
                     ->label(__('Назваиние товара')),
                 TextColumn::make('amount_per_paper')
@@ -320,6 +334,7 @@ class OrderResource extends Resource
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\ViewAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),

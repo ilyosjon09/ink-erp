@@ -2,14 +2,34 @@
 
 namespace App\Filament\Resources\OrderResource\Pages;
 
+use App\Enums\OrderStatus;
 use App\Filament\Resources\OrderResource;
 use App\Models\PaperProp;
+use Filament\Notifications\Notification;
 use Filament\Pages\Actions;
+use Filament\Pages\Actions\Action;
 use Filament\Resources\Pages\ViewRecord;
 
 class ViewOrder extends ViewRecord
 {
     protected static string $resource = OrderResource::class;
+
+    protected function getActions(): array
+    {
+        return [
+            Action::make('accept-order')
+                ->label(__('Отправить на печать'))
+                ->hidden($this->record->status != OrderStatus::NEW)
+                ->action(function () {
+                    $this->record->status = OrderStatus::IN_PRINTING_SHOP;
+                    $this->record->save();
+                    Notification::make()
+                        ->title(__('Заказ успешно отправлен в печать'))
+                        ->success()
+                        ->send();
+                })->requiresConfirmation()
+        ];
+    }
 
     protected function mutateFormDataBeforeFill(array $data): array
     {
@@ -20,17 +40,17 @@ class ViewOrder extends ViewRecord
         $data['grammage'] = $paperProp->grammage;
         $data['size'] = $paperProp->id;
         $data['order_amount'] = $this->record->amount;
+        $data['profit_percentage'] = $this->record->profit_percentage_id;
 
         $data['total_amount'] = $this->record->tirage * $this->record->amount_per_paper;
         $data['tirage_forecast'] = floor((float)$this->record->amount / (float)$this->record->amount_per_paper);
         $data['total_tirage'] = $this->record->tirage + $this->record->additional_tirage;
-
-        $data['printing_forms'] =  $this->record->printingForms()
+        $printingForms = $this->record->printingForms()
             ->whereNot('name', 'like', '%Пичок%')
-            ->get()
-            ->pluck('pivot.printing_form_id');
+            ->get();
+        $data['printing_forms'] = $printingForms->count() > 0 ? $printingForms->pluck('pivot.printing_form_id') : null;
         $cutterId = $this->record->printingForms()->where('name', 'like', '%Пичок%')->get();
-        $data['cutter'] =  $cutterId->first()->id;
+        $data['cutter'] =  $cutterId?->first()?->id;
         return $data;
     }
 }
