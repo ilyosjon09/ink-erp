@@ -22,8 +22,8 @@ class Orders extends Component implements Tables\Contracts\HasTable
 
     protected function getTableQuery(): Builder|Relation
     {
-        $selectStatement = "`id`, CONCAT('#',code, DATE_FORMAT(created_at, '-%m-%Y')) as reg_number, `item_name`, tirage, (select m.name from users m where m.id = created_by) manager, ( select concat( ( select pt.name from paper_types pt where pt.id = p.paper_type_id ),' ', p.grammage,' ', p.`size`) from paper_props p where p.id = paper_prop_id ) paper, print_type, (tirage * amount_per_paper) amount, (SELECT json_arrayagg(s.name) FROM services s where s.id in ( select sp.service_id from order_service_price op left JOIN service_prices sp on op.service_price_id = sp.id where op.order_id = id)) services, item_image";
-        return Order::query()->selectRaw($selectStatement)->withCasts(['services' => 'array']);
+        $selectStatement = "`id`, CONCAT('#',code, DATE_FORMAT(created_at, '-%m-%Y')) as reg_number, `item_name`, tirage, (select m.name from users m where m.id = created_by) manager, ( select concat( ( select pt.name from paper_types pt where pt.id = p.paper_type_id ),' ', p.grammage,' ', p.`size`) from paper_props p where p.id = paper_prop_id ) paper, print_type, (tirage * amount_per_paper) amount, (SELECT json_arrayagg(s.name) FROM services s where s.id in ( select sp.service_id from order_service_price op left JOIN service_prices sp on op.service_price_id = sp.id where op.order_id = o.id)) services, item_image";
+        return Order::query()->from('orders', 'o')->selectRaw($selectStatement)->withCasts(['services' => 'array']);
     }
 
     protected function getTableColumns(): array
