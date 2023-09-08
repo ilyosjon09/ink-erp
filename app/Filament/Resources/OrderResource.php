@@ -54,6 +54,13 @@ class OrderResource extends Resource
     {
         return $form
             ->schema([
+                Grid::make(4)->schema([
+                    TextInput::make('reg_number')
+                        ->label('Рег. номер')
+                        ->prefix('#')
+                        ->disabled()
+                        ->visibleOn(['edit', 'view'])
+                ]),
                 Grid::make(2)->schema([
                     Card::make([
                         TextInput::make('item_name')->label(__('Название товара'))
@@ -298,14 +305,15 @@ class OrderResource extends Resource
                                     $result += $profit;
                                 }
                                 $result = number_format(ceil($result), 0, ', ', ' ');
-                                return new HtmlString("<span class=\"font-mono\">{$result}</span>");
+                                return new HtmlString("<span class=\"font-mono text-xl\">{$result}</span>");
                             }),
                         TextInput::make('per_piece')
                             ->default(0)
                             ->hidden(),
                         Placeholder::make('per_piece_label')->id('per_piece')
                             ->content(function (callable $get) {
-                                return $get('per_piece');
+                                $result = number_format(ceil($get('per_piece')), 0, ', ', ' ');
+                                return new HtmlString("<span class=\"font-mono text-xl\">{$result}</span>");
                             })
                             ->reactive()
                             ->label('Цена за штуку')

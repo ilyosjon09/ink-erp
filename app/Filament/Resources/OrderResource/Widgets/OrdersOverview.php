@@ -17,9 +17,6 @@ class OrdersOverview extends BaseWidget
                 __('Заказы за месяц'),
                 Order::query()->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count()
             )
-                // ->chart(
-                //     Order::query()->selectRaw('count(created_at) o')->whereRaw('year(created_at) = year(current_date()) and month(created_at) = month(CURRENT_DATE())')->groupByRaw('day(created_at)')->get()->pluck('o')->toArray()
-                // )
                 ->color('success'),
             Card::make(
                 __('Новые заказы'),

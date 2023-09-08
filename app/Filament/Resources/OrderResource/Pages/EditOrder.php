@@ -21,6 +21,7 @@ class EditOrder extends EditRecord
     protected function mutateFormDataBeforeFill(array $data): array
     {
         $paperProp = PaperProp::find($this->record->paper_prop_id);
+        $data['reg_number'] = $this->record->code . $this->record->created_at->format('-m-Y');
         $data['services'] = $this->record->servicePrices->pluck('service_id');
         $data['print_type'] = $this->record->print_type;
         $data['paper_type'] = $paperProp->paper_type_id;
