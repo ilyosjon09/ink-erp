@@ -13,6 +13,7 @@ use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Auth;
 use stdClass;
 
 class Orders extends Component implements Tables\Contracts\HasTable
@@ -55,7 +56,11 @@ class Orders extends Component implements Tables\Contracts\HasTable
                 ->label(__('Готово'))
                 ->button()
                 ->action(function (Order $record) {
-                    $record->update(['status' => OrderStatus::IN_ASSEMPLY_SHOP]);
+                    $record->update([
+                        'status' => OrderStatus::IN_ASSEMPLY_SHOP,
+                        'printed_by' => Auth::user()->id,
+                        'printed_at' => now(),
+                    ]);
                     Notification::make()
                         ->title(__('Заказ помечен как готовый'))
                         ->success()
