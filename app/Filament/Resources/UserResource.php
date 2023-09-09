@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\UserResource\Pages;
 use App\Filament\Resources\UserResource\RelationManagers;
+use App\Filament\Resources\UserResource\RelationManagers\RolesRelationManager;
 use App\Models\User;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
@@ -11,6 +12,7 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
+use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -18,7 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 class UserResource extends Resource
 {
     protected static ?string $model = User::class;
-    protected static ?string $navigationGroup = 'Справочники';
+    protected static ?string $navigationGroup = 'Админ';
     protected static ?string $modelLabel = 'пользователь';
     protected static ?string $pluralModelLabel = 'пользователы';
 
@@ -51,6 +53,8 @@ class UserResource extends Resource
                     ->label(__('Имя')),
                 TextColumn::make('username')
                     ->label(__('Логин')),
+                TagsColumn::make('roles.name')
+                    ->label(__('Роли'))
             ])
             ->filters([
                 //
@@ -66,7 +70,7 @@ class UserResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RolesRelationManager::class
         ];
     }
 

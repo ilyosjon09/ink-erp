@@ -7,7 +7,9 @@ namespace Database\Seeders;
 use App\Models\PaperProp;
 use App\Models\PaperType;
 use App\Models\Service;
+use App\Models\ServicePrice;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,6 +17,79 @@ class DatabaseSeeder extends Seeder
      * Seed the application's database.
      */
     public function run(): void
+    {
+        $this->permissions();
+    }
+    protected function permissions(): void
+    {
+        Permission::query()->insert([
+            [
+                'name' => 'order.create',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'order.edit',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'order.view',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'order.delete',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'order.accept',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'order.mark-as-printed',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'order.mark-as-processed',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'user.create',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'user.edit',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'user.view',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'user.delete',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'role.create',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'role.edit',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'role.view',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'role.delete',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'dictionaries',
+                'guard_name' => 'web'
+            ]
+        ]);
+    }
+    protected function servicePrices(): void
     {
         $servicePrices = [
             [
@@ -34,6 +109,8 @@ class DatabaseSeeder extends Seeder
                 'price' => 200_000,
             ],
         ];
+
+        ServicePrice::query()->insert($servicePrices);
     }
 
     protected function paperTypes(): void

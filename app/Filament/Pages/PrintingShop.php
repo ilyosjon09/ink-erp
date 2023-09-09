@@ -21,4 +21,14 @@ class PrintingShop extends Page
 
 
     protected static string $view = 'filament.pages.printing-shop';
+
+    protected static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()->can('order.mark-as-printed');
+    }
+
+    public function mount(): void
+    {
+        abort_unless(auth()->user()->can('order.mark-as-printed'), 403);
+    }
 }

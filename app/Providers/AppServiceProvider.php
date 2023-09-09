@@ -26,6 +26,8 @@ class AppServiceProvider extends ServiceProvider
                 NavigationGroup::make()
                     ->label(_('Работа')),
                 NavigationGroup::make()
+                    ->label(_('Админ')),
+                NavigationGroup::make()
                     ->label(_('Справочники')),
             ]);
         });
