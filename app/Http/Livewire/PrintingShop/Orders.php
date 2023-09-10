@@ -8,6 +8,7 @@ use Filament\Notifications\Notification;
 use Livewire\Component;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
+use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\TextColumn;
@@ -45,7 +46,12 @@ class Orders extends Component implements Tables\Contracts\HasTable
             TextColumn::make('tirage')->label(__('Тираж')),
             TextColumn::make('amount')->label(__('Штук')),
             TagsColumn::make('services')->label(__('Услуги')),
-            ImageColumn::make('item_image')->label(__('Фото'))->square()->extraImgAttributes(['loading' => 'lazy'])
+            IconColumn::make('image_preview')->label(__('Фото'))
+                ->options(['heroicon-o-eye'])->action(function (Order $record): void {
+                    $this->dispatchBrowserEvent('open-image-preview-modal', [
+                        'url' => asset('storage/' . $record->item_image),
+                    ]);
+                }),
         ];
     }
 
