@@ -297,7 +297,6 @@ class OrderResource extends Resource
                                 $result = $totalTirage == 0 || empty($get('services')) ?
                                     0 : ($totalTirage > 0 ? $totalTirage * $paperPrice : $paperPrice)
                                     + ($tirage < 1000 ? $servicesPrice : $servicesPrice * $totalTirage)
-                                    + ($get('print_type') == '4+4' ? 300000 : 200000)
                                     + ($formPrices + $cutterPrice);
                                 if ($get('profit_percentage')) {
                                     $profitPercentage = ProfitPercentage::findOrFail($get('profit_percentage'))->percentage;
