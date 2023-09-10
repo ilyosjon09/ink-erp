@@ -2,7 +2,7 @@
     <div x-data="{visible: false, url: null}"
         @open-image-preview-modal.window="visible = true; url = $event.detail.url">
         <template x-teleport="body">
-            <div x-show="visible" x-transition @click="visible = false"
+            <div x-show="visible" x-transition.opacity.duration.300ms @click="visible = false"
                 class="absolute flex items-center justify-center p-8 z-50 bg-black/50 inset-0">
                 <div class="flex">
                     <div>
