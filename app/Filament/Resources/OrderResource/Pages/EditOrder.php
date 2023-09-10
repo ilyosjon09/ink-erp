@@ -2,8 +2,11 @@
 
 namespace App\Filament\Resources\OrderResource\Pages;
 
+use App\Enums\OrderStatus;
 use App\Filament\Resources\OrderResource;
 use App\Models\PaperProp;
+use App\Models\PrintingForm;
+use App\Models\ServicePrice;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
 
@@ -41,5 +44,68 @@ class EditOrder extends EditRecord
         $cutterId = $this->record->printingForms()->where('name', 'like', '%Пичок%')->get();
         $data['cutter'] =  $cutterId?->first()?->id;
         return $data;
+    }
+
+    protected function mutateFormDataBeforeSave(array $data): array
+    {
+        $paperProp = PaperProp::query()->find($data['size']);
+
+        $data = [
+            'item_name' => $data['item_name'],
+            'client_id' => $data['client_id'],
+            'paper_prop_id' => $paperProp->id,
+            'paper_price' => $paperProp->price,
+            'amount' => $data['order_amount'],
+            'amount_per_paper' => $data['amount_per_paper'],
+            'print_type' => $data['print_type'],
+            'tirage' => $data['tirage'],
+            'item_image' => $data['item_image'],
+            'additional_tirage' => $data['additional_tirage'],
+            'profit_percentage_id' => $data['profit_percentage'],
+        ];
+
+        return $data;
+    }
+
+    protected function afterSave(): void
+    {
+        /** @var \App\Models\Order $order */
+        $order = $this->record;
+        $servicePrices = ServicePrice::query()
+            ->whereIn('service_id', $this->data['services'])
+            ->where('print_type', $this->data['print_type'])
+            ->when(
+                $this->data['tirage'] >= 1000,
+                fn ($query) => $query->select('id', 'price_after_1k as price'),
+                fn ($query) => $query->select('id', 'price_before_1k as price')
+            )->get();
+
+        $sd = [];
+
+        $servicePrices->each(function ($service) use (&$sd) {
+            $sd[$service->id] = ['price' => $service->price];
+        });
+
+        $order->servicePrices()->sync($sd);
+
+        $printingForms = $this->data['printing_forms'];
+        $printingForms[] = $this->data['cutter'];
+
+        $printingForms = PrintingForm::query()
+            ->whereIn('id', $printingForms)
+            ->when(
+                $this->data['print_type'] == '4+0',
+                fn ($query) => $query->select('id', 'four_zero_price as price'),
+                fn ($query) => $query->select('id', 'double_four_price as price')
+            )->get();
+
+        $pd = [];
+        $printingForms = $printingForms->each(function ($printingForm) use (&$pd) {
+            $pd[$printingForm->id] = [
+                'price' => $printingForm->price,
+            ];
+        });
+
+        $order->printingForms()->sync($pd);
     }
 }
