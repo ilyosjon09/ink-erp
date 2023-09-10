@@ -8,6 +8,7 @@ use Filament\Pages\Page;
 use Filament\Tables;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
+use Illuminate\Support\Facades\Auth;
 
 class PrintingShop extends Page
 {
@@ -24,11 +25,11 @@ class PrintingShop extends Page
 
     protected static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()->can('order.mark-as-printed');
+        return auth()->user()->getAllPermissions()->contains('name', 'order.mark-as-printed');
     }
 
     public function mount(): void
     {
-        abort_unless(auth()->user()->can('order.mark-as-printed'), 403);
+        abort_unless(auth()->user()->getAllPermissions()->contains('name', 'order.mark-as-printed'), 403);
     }
 }

@@ -10,6 +10,7 @@ use App\Models\Service;
 use App\Models\ServicePrice;
 use Illuminate\Database\Seeder;
 use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -18,7 +19,10 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->permissions();
+        // $this->permissions();
+
+        $superadmin = Role::query()->where('name', 'Суперадмин')->first();
+        $superadmin->syncPermissions(Permission::all());
     }
     protected function permissions(): void
     {
@@ -88,6 +92,10 @@ class DatabaseSeeder extends Seeder
                 'guard_name' => 'web'
             ]
         ]);
+
+        $superadmin = Role::query()->where('name', 'Суперадмин')->first();
+
+        $superadmin->syncPermissions(Permission::all());
     }
     protected function servicePrices(): void
     {

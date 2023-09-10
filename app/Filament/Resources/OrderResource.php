@@ -136,6 +136,10 @@ class OrderResource extends Resource
                                             'tirage_forecast',
                                             floor((float)$state / (float)$get('amount_per_paper'))
                                         );
+
+                                        $set('tirage', floor((float)$state / (float)$get('amount_per_paper')));
+                                        $set('total_amount', (int)$get('amount_per_paper') * (int)$get('tirage'));
+                                        $set('total_tirage',  (int)$get('tirage') + (int)$get('additional_tirage'));
                                     }
                                 })
                                 ->required(),
@@ -295,14 +299,16 @@ class OrderResource extends Resource
                                     + ($tirage < 1000 ? $servicesPrice : $servicesPrice * $totalTirage)
                                     + ($get('print_type') == '4+4' ? 300000 : 200000)
                                     + ($formPrices + $cutterPrice);
-                                if ($get('total_amount') > 0) {
-                                    $set('per_piece', $result / $get('total_amount'));
-                                }
                                 if ($get('profit_percentage')) {
-
                                     $profitPercentage = ProfitPercentage::findOrFail($get('profit_percentage'))->percentage;
                                     $profit = ($result / 100) * $profitPercentage;
                                     $result += $profit;
+                                } else {
+                                    $set('per_piece', 0);
+                                    return new HtmlString("<span class=\"font-mono text-xl\">0</span>");
+                                }
+                                if ($get('total_amount') > 0) {
+                                    $set('per_piece', $result / $get('total_amount'));
                                 }
                                 $result = number_format(ceil($result), 0, ', ', ' ');
                                 return new HtmlString("<span class=\"font-mono text-xl\">{$result}</span>");
