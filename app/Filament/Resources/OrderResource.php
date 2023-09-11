@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\OrderStatus;
 use App\Filament\Resources\OrderResource\Pages;
 use App\Filament\Resources\OrderResource\RelationManagers;
 use App\Models\Order;
@@ -30,7 +31,10 @@ use Filament\Resources\Form;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Filters\Layout;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
@@ -340,10 +344,21 @@ class OrderResource extends Resource
                     ->label(__('Штук за лист')),
                 TextColumn::make('tirage')
                     ->label(__('Тираж')),
-
+                BadgeColumn::make('status')
+                    ->formatStateUsing(
+                        fn (int $state) => __(OrderStatus::from($state)->label())
+                    )
+                    ->label(__('Статус'))
+                    ->colors(OrderStatus::colors()),
             ])
             ->filters([
-                //
+                SelectFilter::make('status')
+                    ->options(
+                        collect(OrderStatus::cases())->mapWithKeys(fn (OrderStatus $status) => [$status->value => $status->label()])->toArray()
+                    )
+                    ->multiple()
+                    ->label(__('Статус'))
+                    ->default([OrderStatus::NEW->value])
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
@@ -351,7 +366,8 @@ class OrderResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ])
+            ->filtersLayout(Layout::AboveContentCollapsible);
     }
 
     public static function getRelations(): array

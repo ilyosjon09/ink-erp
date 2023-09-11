@@ -20,4 +20,13 @@ enum OrderStatus: int
             OrderStatus::CANCELED => __('Отменен'),
         };
     }
+
+    public static function colors(): array
+    {
+        return [
+            'secondary',
+            'primary' => OrderStatus::NEW->value,
+            'success' => OrderStatus::COMPLETED->value,
+        ];
+    }
 }

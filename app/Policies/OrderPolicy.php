@@ -38,7 +38,7 @@ class OrderPolicy
      */
     public function update(User $user, Order $order): bool
     {
-        return $user->getAllPermissions()->contains('name', 'order.edit') && $order->status === OrderStatus::NEW;
+        return $user->getAllPermissions()->contains('name', 'order.edit') && ($order->status === OrderStatus::NEW || $user->roles->contains('name', 'Суперадмин'));
     }
 
     /**
