@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Livewire\PrintingShop;
+namespace App\Http\Livewire;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
@@ -9,28 +9,29 @@ use Livewire\Component;
 use Filament\Tables;
 use Filament\Tables\Actions\Action;
 use Filament\Tables\Columns\IconColumn;
-use Filament\Tables\Columns\ImageColumn;
 use Filament\Tables\Columns\TagsColumn;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\Facades\Auth;
 
-class Orders extends Component implements Tables\Contracts\HasTable
+class PostPrintOrders extends Component implements Tables\Contracts\HasTable
 {
     use Tables\Concerns\InteractsWithTable;
 
+
     public function render()
     {
-        return view('livewire.printing-shop.orders');
+        return view('livewire.post-print-orders');
     }
+
 
     protected function getTableQuery(): Builder|Relation
     {
         $selectStatement = "`id`, CONCAT('#',code, DATE_FORMAT(created_at, '-%m-%Y')) as reg_number, `item_name`, tirage, (select m.name from users m where m.id = created_by) manager, ( select concat( ( select pt.name from paper_types pt where pt.id = p.paper_type_id ),' ', p.grammage,' ', p.`size`) from paper_props p where p.id = paper_prop_id ) paper, print_type, (tirage * amount_per_paper) amount, (SELECT json_arrayagg(s.name) FROM services s where s.id in ( select sp.service_id from order_service_price op left JOIN service_prices sp on op.service_price_id = sp.id where op.order_id = orders.id)) services, item_image";
         return Order::query()
             ->selectRaw($selectStatement)
-            ->where('status', OrderStatus::IN_PRINTING_SHOP)
+            ->where('status', OrderStatus::IN_ASSEMPLY_SHOP)
             ->withCasts(['services' => 'array']);
     }
 
