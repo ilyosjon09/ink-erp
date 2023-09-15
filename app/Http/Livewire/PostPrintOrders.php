@@ -4,6 +4,8 @@ namespace App\Http\Livewire;
 
 use App\Enums\OrderStatus;
 use App\Models\Order;
+use App\Models\Service;
+use App\Models\ServicePrice;
 use Filament\Forms\ComponentContainer;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Forms\Components\TextInput;
@@ -60,13 +62,13 @@ class PostPrintOrders extends Component implements Tables\Contracts\HasTable
             Action::make('details')
                 ->label(__('Детали'))
                 ->mountUsing(fn (ComponentContainer $form, Order $record) => $form->fill([
-                    'services' => $record->services,
+                    'services' => Service::query()->get()->pluck('name', 'id'),
                 ]))
                 ->action(function (Order $record, array $data): void {
                     dd($data);
                 })
                 ->form([
-                    TextInput::make('services')
+                    CheckboxList::make('services')
                 ])->button()->icon('heroicon-o-eye'),
         ];
     }
