@@ -7,8 +7,14 @@ use App\Models\Order;
 use App\Models\Service;
 use App\Models\ServicePrice;
 use Filament\Forms\ComponentContainer;
+use Filament\Forms\Components\Card;
 use Filament\Forms\Components\CheckboxList;
+use Filament\Forms\Components\Fieldset;
+use Filament\Forms\Components\Grid;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Components\ViewField;
 use Filament\Notifications\Notification;
 use Filament\Resources\Form;
 use Livewire\Component;
@@ -62,14 +68,64 @@ class PostPrintOrders extends Component implements Tables\Contracts\HasTable
             Action::make('details')
                 ->label(__('Детали'))
                 ->mountUsing(fn (ComponentContainer $form, Order $record) => $form->fill([
-                    'services' => Service::query()->get()->pluck('name', 'id'),
+                    'item_image' => $record->item_image,
+                    'services' => $record->servicePrices()->get()->mapWithKeys(fn ($servicePrice, $key) => [$servicePrice->id => $servicePrice->pivot->completed])->toArray(),
                 ]))
                 ->action(function (Order $record, array $data): void {
                     dd($data);
                 })
                 ->form([
-                    CheckboxList::make('services')
-                ])->button()->icon('heroicon-o-eye'),
+                    Grid::make(2)->schema([
+                        Card::make([
+                            Placeholder::make('Рег. номер')->content(fn (Order $record) => $record->reg_number),
+                            Placeholder::make('Менеджер')->content(fn (Order $record) => $record->manager),
+                            Placeholder::make('Название')->content(fn (Order $record) => $record->item_name)->columnSpanFull(),
+                        ])->columns(2)->columnSpan(1),
+                        Card::make([
+                            ViewField::make('item_image')
+                                ->label(__('Изображение'))
+                                ->view('image')
+                        ])->columnSpan(1),
+                    ]),
+                    Fieldset::make('services')
+                        ->label(__('Статус услуги'))
+                        ->columns(1)
+                        ->childComponents(function (Order $record) {
+                            return $record->servicePrices()
+                                ->with('service:id,name')
+                                ->get()
+                                ->map(
+                                    fn ($servicePrice) => Toggle::make('services.' . $servicePrice->id)
+                                        ->label(__($servicePrice->service->name))
+                                        ->onIcon('heroicon-o-check')
+                                        ->offIcon('heroicon-o-x')
+                                        ->hint(fn ($state) => $state ? __('Готово') : __('Не готово'))
+                                        ->hintColor(fn ($state) =>  $state ? 'success' : 'secondary')
+                                        ->reactive()
+                                )
+                                ->toArray();
+                        }),
+                    Fieldset::make('printing_forms')
+                        ->hidden(fn (Order $record) => $record->printingForms()->get()->isEmpty())
+                        ->label(__('Печатные формы'))
+                        ->columns(1)
+                        ->childComponents(function (Order $record) {
+                            return $record->printingForms()
+                                ->get()
+                                ->map(
+                                    fn ($printingForm) => Toggle::make('printing_forms.' . $printingForm->id)
+                                        ->label(__($printingForm->name))
+                                        ->onIcon('heroicon-o-check')
+                                        ->offIcon('heroicon-o-x')
+                                        ->hint(fn ($state) => $state ? __('Готово') : __('Не готово'))
+                                        ->hintColor(fn ($state) =>  $state ? 'success' : 'secondary')
+                                        ->reactive()
+                                )
+                                ->toArray();
+                        }),
+                ])
+                ->button()
+                ->icon('heroicon-o-eye'),
         ];
     }
 }

@@ -29,7 +29,7 @@ class Order extends Model
 
     public function servicePrices()
     {
-        return $this->belongsToMany(ServicePrice::class)->withTimestamps();
+        return $this->belongsToMany(ServicePrice::class)->using(OrderServicePrice::class)->withPivot(['completed'])->withTimestamps();
     }
 
     public function printingForms()

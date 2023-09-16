@@ -22,6 +22,6 @@ class ServicePrice extends Model
 
     public function orders()
     {
-        return $this->belongsToMany(Order::class)->withTimestamps();
+        return $this->belongsToMany(Order::class)->using(OrderServicePrice::class)->withPivot(['completed'])->withTimestamps();
     }
 }
