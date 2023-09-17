@@ -4,9 +4,9 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
-class OrderServicePrice extends Pivot
+class OrderPrintingForm extends Pivot
 {
     protected $casts = [
-        'completed' => 'boolean',
+        'completed' => 'boolean'
     ];
 }

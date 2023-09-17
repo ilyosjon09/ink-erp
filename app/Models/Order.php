@@ -14,6 +14,7 @@ class Order extends Model
 
     protected $casts = [
         'created_at' => 'date',
+        'printed_at' => 'date',
         'status' => OrderStatus::class,
     ];
 
@@ -34,7 +35,7 @@ class Order extends Model
 
     public function printingForms()
     {
-        return $this->belongsToMany(PrintingForm::class)->withTimestamps();
+        return $this->belongsToMany(PrintingForm::class)->using(OrderPrintingForm::class)->withPivot(['completed'])->withTimestamps();
     }
 
     public function maker()

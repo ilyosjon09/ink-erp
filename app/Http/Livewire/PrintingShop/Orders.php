@@ -46,7 +46,7 @@ class Orders extends Component implements Tables\Contracts\HasTable
             TextColumn::make('amount')->label(__('Штук')),
             TagsColumn::make('services')->label(__('Услуги')),
             IconColumn::make('image_preview')->label(__('Фото'))
-                ->options(['heroicon-o-eye'])->action(function (Order $record): void {
+                ->options(['heroicon-o-photograph'])->action(function (Order $record): void {
                     $this->dispatchBrowserEvent('open-image-preview-modal', [
                         'url' => asset('storage/' . $record->item_image),
                     ]);
@@ -67,7 +67,7 @@ class Orders extends Component implements Tables\Contracts\HasTable
                         'printed_at' => now(),
                     ]);
                     Notification::make()
-                        ->title(__('Заказ помечен как готовый'))
+                        ->title(__('Заказ был напечатан'))
                         ->success()
                         ->send();
                 })->requiresConfirmation()

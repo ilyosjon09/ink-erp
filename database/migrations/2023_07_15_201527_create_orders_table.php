@@ -34,7 +34,7 @@ return new class extends Migration
             $table->foreignIdFor(User::class, 'printed_by')->nullable();
             $table->foreignIdFor(User::class, 'processed_by')->nullable();
             $table->timestamp('printed_at')->nullable();
-            $table->timestamp('processesed_at')->nullable();
+            $table->timestamp('processed_at')->nullable();
             $table->timestamps();
 
             $table->unique(['code', 'created_at']);
