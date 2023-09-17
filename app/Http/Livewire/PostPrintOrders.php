@@ -175,6 +175,7 @@ class PostPrintOrders extends Component implements Tables\Contracts\HasTable
                     }
 
                     $record->update(['status' => OrderStatus::COMPLETED, 'processed_at' => now()]);
+                    $record->save();
                     Notification::make()
                         ->title(__('Заказ помечен как готовый'))
                         ->success()

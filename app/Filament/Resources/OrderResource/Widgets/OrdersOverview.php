@@ -15,7 +15,10 @@ class OrdersOverview extends BaseWidget
         return [
             Card::make(
                 __('Заказы за месяц'),
-                Order::query()->whereYear('created_at', now()->year)->whereMonth('created_at', now()->month)->count()
+                Order::query()
+                    ->whereYear('created_at', now()->year)
+                    ->whereMonth('created_at', now()->month)
+                    ->count()
             )
                 ->color('success'),
             Card::make(
@@ -25,13 +28,24 @@ class OrdersOverview extends BaseWidget
                     ->count()
             ),
             Card::make(
-                __('Выполняемые заказы'),
-                Order::query()->whereNot('status', value: OrderStatus::NEW)->count()
+                __('Печатаемые заказы'),
+                Order::query()
+                    ->where('status', OrderStatus::IN_PRINTING_SHOP)
+                    ->count()
+            ),
+            Card::make(
+                __('Заказы в цех'),
+                Order::query()
+                    ->where('status', OrderStatus::IN_ASSEMPLY_SHOP)
+                    ->count()
             ),
             Card::make(
                 __('Готовые заказы'),
-                Order::query()->where('status', value: OrderStatus::COMPLETED)->count()
-            ),
+                Order::query()
+                    ->where('status',  OrderStatus::COMPLETED)
+                    ->count()
+            )
+                ->color('success'),
         ];
     }
 }
