@@ -39,7 +39,6 @@ class UserResource extends Resource
                 TextInput::make('password')
                     ->label(__('Пароль'))
                     ->password()
-                    ->required(),
             ]);
     }
 

@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Enums\OrderStatus;
+use App\Enums\Role;
 use App\Models\Order;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -38,7 +39,7 @@ class OrderPolicy
      */
     public function update(User $user, Order $order): bool
     {
-        return $user->getAllPermissions()->contains('name', 'order.edit') && ($order->status === OrderStatus::NEW || $user->roles->contains('name', 'Суперадмин'));
+        return $user->getAllPermissions()->contains('name', 'order.edit') && ($order->status === OrderStatus::NEW || $user->roles->contains('name', Role::SUPERADMIN->value));
     }
 
     /**
