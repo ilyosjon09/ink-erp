@@ -19,6 +19,7 @@ return new class extends Migration
             $table->tinyInteger('operation')->comment('0 - subtract, 1 - add');
             $table->unsignedInteger('amount');
             $table->unsignedBigInteger('price');
+            $table->string('comment')->nullable();
             $table->foreignIdFor(User::class, 'created_by');
             $table->foreignIdFor(User::class, 'updated_by')->nullable();
             $table->timestamps();

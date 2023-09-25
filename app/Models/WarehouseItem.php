@@ -15,4 +15,9 @@ class WarehouseItem extends Model
     {
         return $this->hasMany(WarehouseOperation::class, 'item_id');
     }
+
+    public function category()
+    {
+        return $this->belongsTo(WarehouseItemCategory::class, 'category_id');
+    }
 }

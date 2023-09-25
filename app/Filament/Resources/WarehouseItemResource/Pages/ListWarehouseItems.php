@@ -22,9 +22,20 @@ class ListWarehouseItems extends ListRecords
 
     protected function getTableQuery(): Builder
     {
-        $query = <<<SQL
-            SUM( CASE WHEN o.operation = 0 THEN o.amount ELSE 0 END ) - SUM( CASE WHEN o.operation = 1 THEN o.amount ELSE 0 END ) AS rem_amount 
+        $balanceQuery = <<<SQL
+            coalesce(SUM( CASE WHEN o.operation = 0 THEN o.amount ELSE 0 END ) - SUM( CASE WHEN o.operation = 1 THEN o.amount ELSE 0 END ),0) AS rem_amount 
         SQL;
-        return parent::getTableQuery()->addSelect(['balance' => DB::table('warehouse_operations as o')->selectRaw($query)->whereRaw('o.item_id = warehouse_items.id')]);
+        $fullNameQuery = <<<SQL
+            case when warehouse_items.category_id is null then warehouse_items.name else CONCAT(c.name,' → ', warehouse_items.name) end full_name
+        SQL;
+        return parent::getTableQuery()
+            ->addSelect([
+                'balance' => DB::table('warehouse_operations as o')
+                    ->selectRaw($balanceQuery)
+                    ->whereRaw('o.item_id = warehouse_items.id'),
+                'full_name' => DB::table('warehouse_item_categories as c')
+                    ->selectRaw($fullNameQuery)
+                    ->whereRaw('c.id = warehouse_items.category_id')
+            ]);
     }
 }

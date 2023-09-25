@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Enums\WarehouseOperationType;
 use App\Filament\Resources\WarehouseOperationResource\Pages;
 use App\Filament\Resources\WarehouseOperationResource\RelationManagers;
+use App\Models\WarehouseItem;
 use App\Models\WarehouseOperation;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
@@ -13,6 +14,7 @@ use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Select;
+use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -22,6 +24,7 @@ use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Support\Facades\DB;
 
 class WarehouseOperationResource extends Resource
 {
@@ -29,8 +32,8 @@ class WarehouseOperationResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-calculator';
     protected static ?string $navigationGroup = 'Склад';
-    protected static ?string $modelLabel = 'операция';
-    protected static ?string $pluralModelLabel = 'складские операции';
+    protected static ?string $modelLabel = 'приход/расход';
+    protected static ?string $pluralModelLabel = 'приход/расход';
     protected static ?int $navigationSort = 1;
 
     public static function form(Form $form): Form
@@ -39,7 +42,11 @@ class WarehouseOperationResource extends Resource
             ->schema([
                 Select::make('item_id')
                     ->label(__('Товар'))
-                    ->relationship('item', 'name')
+                    ->options(function () {
+                        $result = DB::select("SELECT warehouse_items.id id, ( case when warehouse_items.category_id is null then concat( warehouse_items.code,' - ', warehouse_items.`name`) else concat( warehouse_items.code,' - ', warehouse_item_categories.`name`,' → ', warehouse_items.`name`) end ) name FROM warehouse_items LEFT JOIN warehouse_item_categories on warehouse_item_categories.id = warehouse_items.category_id");
+                        return collect($result)->pluck('name', 'id');
+                    })
+                    ->searchable()
                     ->createOptionForm([
                         Grid::make(3)->schema(
                             [
@@ -87,6 +94,10 @@ class WarehouseOperationResource extends Resource
                 DatePicker::make('created_at')
                     ->label(__('Дата'))
                     ->default(now()),
+                Textarea::make('comment')
+                    ->label(__('Примечание'))
+                    ->maxLength(160)
+                    ->columnSpanFull(),
                 Hidden::make('created_by')->default(auth()->user()->id)
             ]);
     }
@@ -102,7 +113,7 @@ class WarehouseOperationResource extends Resource
                     ->formatStateUsing(fn ($state) => WarehouseOperationType::from($state)->label())
                     ->colors([
                         'success' => WarehouseOperationType::ADD->value,
-                        'error' => WarehouseOperationType::SUBTRACT->value,
+                        'danger' => WarehouseOperationType::SUBTRACT->value,
                     ]),
                 TextColumn::make('amount')
                     ->label(__('Количество'))
@@ -118,7 +129,7 @@ class WarehouseOperationResource extends Resource
                     ->label(__('Создатель')),
                 TextColumn::make('created_at')
                     ->label(__('Создан в'))
-                    ->formatStateUsing(fn ($state) => $state->format('d.m.Y H:i')),
+                    ->formatStateUsing(fn ($state) => $state->format('d.m.Y')),
             ])
             ->filters([
                 //

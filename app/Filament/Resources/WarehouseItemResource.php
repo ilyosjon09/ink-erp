@@ -5,10 +5,13 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\WarehouseItemResource\Pages;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers\OperationsRelationManager;
+use App\Models\PaperProp;
 use App\Models\WarehouseItem;
+use App\Models\WarehouseItemCategory;
 use Filament\Forms;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Form;
 use Filament\Resources\Resource;
@@ -33,6 +36,29 @@ class WarehouseItemResource extends Resource
             ->schema([
                 Grid::make(3)->schema(
                     [
+                        Select::make('category_id')
+                            ->label(__('Категория'))
+                            ->relationship('category', 'name')
+                            ->preload()
+                            ->searchable()
+                            ->reactive()
+                            ->columnSpan(fn ($state) => $state ? (WarehouseItemCategory::query()->findOrFail($state)->for_paper ? 2 : 3) : 3),
+                        Select::make('grammage')
+                            ->label(__('Граммаж'))
+                            ->visible(fn (callable $get) => $get('category_id') ? WarehouseItemCategory::query()->findOrFail($get('category_id'))->for_paper : false)
+                            ->options(function (callable $get) {
+                                $paperType = WarehouseItemCategory::query()->findOrFail($get('category_id'))->paper_type_id;
+                                return PaperProp::query()->where('paper_type_id', $paperType)->select('grammage')->groupBy('grammage')->get()->pluck('grammage', 'grammage');
+                            })
+                            ->reactive()
+                            ->afterStateUpdated(function (callable $get, callable $set, $state) {
+                                $category = WarehouseItemCategory::query()->findOrFail($get('category_id'));
+
+                                if ($category->for_paper) {
+                                    $set('name', $state);
+                                }
+                            })
+                            ->preload(),
                         TextInput::make('code')
                             ->label(__('Код'))
                             ->placeholder('000')
@@ -46,11 +72,17 @@ class WarehouseItemResource extends Resource
                             ->unique(),
                         TextInput::make('measurement_unit')
                             ->label(__('Единица измерение'))
+                            ->datalist([
+                                'шт.',
+                                'л.',
+                                'кг.',
+                                'м.',
+                            ])
                             ->columnSpanFull()
                             ->required(),
                         Hidden::make('created_by')->default(auth()->user()->id)
                     ]
-                )->maxWidth('xl')
+                )->columnSpan(1)
             ]);
     }
 
@@ -59,7 +91,9 @@ class WarehouseItemResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('code')->label((__('Код'))),
-                TextColumn::make('name')->label((__('Название'))),
+                TextColumn::make('label')->label((__('Название')))->formatStateUsing(function (WarehouseItem $record) {
+                    return $record->full_name ?? $record->name;
+                }),
                 TextColumn::make('balance')->label((__('Сальдо'))),
             ])
             ->filters([
