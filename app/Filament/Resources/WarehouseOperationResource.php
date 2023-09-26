@@ -110,6 +110,7 @@ class WarehouseOperationResource extends Resource
                     ->label(__('Товар')),
                 BadgeColumn::make('operation')
                     ->label(__('Тип'))
+                    ->sortable()
                     ->formatStateUsing(fn ($state) => WarehouseOperationType::from($state)->label())
                     ->colors([
                         'success' => WarehouseOperationType::ADD->value,
@@ -129,6 +130,7 @@ class WarehouseOperationResource extends Resource
                     ->label(__('Создатель')),
                 TextColumn::make('created_at')
                     ->label(__('Создан в'))
+                    ->sortable()
                     ->formatStateUsing(fn ($state) => $state->format('d.m.Y')),
             ])
             ->filters([
@@ -140,7 +142,8 @@ class WarehouseOperationResource extends Resource
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getPages(): array

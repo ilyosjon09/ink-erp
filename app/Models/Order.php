@@ -23,9 +23,9 @@ class Order extends Model
         return $this->belongsTo(Client::class);
     }
 
-    public function paperType()
+    public function paperProperties()
     {
-        return $this->belongsTo(PaperType::class);
+        return $this->belongsTo(PaperProp::class, 'paper_prop_id', 'id');
     }
 
     public function servicePrices()

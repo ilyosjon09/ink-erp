@@ -15,4 +15,9 @@ class PaperProp extends Model
     {
         return $this->belongsTo(PaperType::class);
     }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'paper_prop_id');
+    }
 }

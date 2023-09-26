@@ -3,7 +3,11 @@
 namespace App\Http\Livewire\PrintingShop;
 
 use App\Enums\OrderStatus;
+use App\Enums\WarehouseOperationType;
 use App\Models\Order;
+use App\Models\WarehouseItem;
+use App\Models\WarehouseItemCategory;
+use App\Models\WarehouseOperation;
 use Filament\Notifications\Notification;
 use Livewire\Component;
 use Filament\Tables;
@@ -60,7 +64,26 @@ class Orders extends Component implements Tables\Contracts\HasTable
             Action::make('mark as done')
                 ->label(__('Готово'))
                 ->button()
-                ->action(function (Order $record) {
+                ->action(function (?Order $record) {
+
+                    $record->load('paperProperties');
+                    $record->refresh();
+                    $category = WarehouseItemCategory::query()->with('items')->where('paper_type_id', $record->paperProperties->paperType->id)->first();
+
+                    $item = $category->items->where('grammage', $record->paperProperties->grammage)->first();
+                    $price = WarehouseOperation::query()->where('item_id', $item->id)->latest()->first()->price;
+
+                    WarehouseOperation::query()->create([
+                        'item_id' => $item->id,
+                        'operation' => WarehouseOperationType::SUBTRACT,
+                        'amount' => (int)$record->tirage + (int)$record->additional_tirage,
+                        'price' => $price,
+                        'comment' => 'Из печатная',
+                        'created_by' => auth()->user()->id,
+                        'created_at' => now(),
+                        'updated_at' => now(),
+                    ]);
+
                     $record->update([
                         'status' => OrderStatus::IN_ASSEMPLY_SHOP,
                         'printed_by' => Auth::user()->id,
