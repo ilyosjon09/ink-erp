@@ -106,30 +106,28 @@ class WarehouseOperationResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('item.name')
+                TextColumn::make('full_name')
                     ->label(__('Товар')),
-                BadgeColumn::make('operation')
-                    ->label(__('Тип'))
-                    ->sortable()
-                    ->formatStateUsing(fn ($state) => WarehouseOperationType::from($state)->label())
-                    ->colors([
-                        'success' => WarehouseOperationType::ADD->value,
-                        'danger' => WarehouseOperationType::SUBTRACT->value,
-                    ]),
-                TextColumn::make('amount')
-                    ->label(__('Количество'))
-                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', ' ')),
+                TextColumn::make('debet')
+                    ->label(__('Приход'))
+                    ->alignRight()
+                    ->formatStateUsing(fn ($state) => is_null($state) ? null : number_format($state, 0, ',', ' ')),
+                TextColumn::make('credit')
+                    ->label(__('Расход'))
+                    ->alignRight()
+                    ->formatStateUsing(fn ($state) => is_null($state) ? null : number_format($state, 0, ',', ' ')),
                 TextColumn::make('price')
                     ->label(__('Цена'))
+                    ->alignRight()
                     ->formatStateUsing(fn ($state) => number_format($state, 0, ',', ' ')),
                 TextColumn::make('total')
                     ->label(__('Сумма'))
+                    ->alignRight()
                     ->getStateUsing(fn (?WarehouseOperation $record) => $record->amount * $record->price)
                     ->formatStateUsing(fn ($state) => number_format($state, 0, ',', ' ')),
-                TextColumn::make('creator.name')
-                    ->label(__('Создатель')),
                 TextColumn::make('created_at')
                     ->label(__('Создан в'))
+                    ->description(fn (WarehouseOperation $record) => $record->creator->name)
                     ->sortable()
                     ->formatStateUsing(fn ($state) => $state->format('d.m.Y')),
             ])
@@ -151,5 +149,16 @@ class WarehouseOperationResource extends Resource
         return [
             'index' => Pages\ManageWarehouseOperations::route('/'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        $selectStatement = <<<SQL
+            *, 
+            case operation when 0 then amount else null end as debet, 
+            case operation when 1 then amount else null end as credit,
+            ( SELECT case when i.category_id is null then i.name else CONCAT(c.name,' → ', i.name) end full_name from warehouse_items i left JOIN warehouse_item_categories c on i.category_id = c.id where i.id = warehouse_operations.item_id ) full_name
+        SQL;
+        return parent::getEloquentQuery()->withoutGlobalScopes()->with('creator')->selectRaw($selectStatement);
     }
 }

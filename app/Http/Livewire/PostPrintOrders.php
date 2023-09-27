@@ -188,6 +188,7 @@ class PostPrintOrders extends Component implements Tables\Contracts\HasTable
 
                     return !$servicePrices->merge($printingForms)->every(fn ($item) => $item);
                 })
+                ->requiresConfirmation()
                 ->button()
                 ->icon('heroicon-o-check-circle'),
         ];
