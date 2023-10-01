@@ -108,14 +108,17 @@ class WarehouseOperationResource extends Resource
             ->columns([
                 TextColumn::make('full_name')
                     ->label(__('Товар')),
-                TextColumn::make('debet')
-                    ->label(__('Приход'))
+                Tables\Columns\BadgeColumn::make('operation')
+                    ->label(__('Тип'))
+                    ->formatStateUsing(fn ($state) => WarehouseOperationType::from($state)->label())
+                    ->colors([
+                        'success' => WarehouseOperationType::ADD->value,
+                        'danger' => WarehouseOperationType::SUBTRACT->value,
+                    ]),
+                Tables\Columns\TextColumn::make('amount')
+                    ->label(__('Количество'))
                     ->alignRight()
-                    ->formatStateUsing(fn ($state) => is_null($state) ? null : number_format($state, 0, ',', ' ')),
-                TextColumn::make('credit')
-                    ->label(__('Расход'))
-                    ->alignRight()
-                    ->formatStateUsing(fn ($state) => is_null($state) ? null : number_format($state, 0, ',', ' ')),
+                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', ' ')),
                 TextColumn::make('price')
                     ->label(__('Цена'))
                     ->alignRight()
