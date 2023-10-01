@@ -44,7 +44,7 @@ class WarehouseItemCategoryResource extends Resource
                 )->schema([
                     Select::make('paper_type_id')
                         ->label(__('Тип бумаги'))
-                        ->relationship('paperType', 'name')
+                        ->relationship('paperType', 'name', fn (Builder $query) => $query->whereRaw("id not in (select paper_type_id from warehouse_item_categories)"))
                         ->preload()
                         ->hidden(fn (callable $get) => !$get('for_paper'))
                         ->reactive()
