@@ -1,6 +1,6 @@
 ## Todo
 ### Improvements and bugfixes
-- [ ] Reorder navigation items
+- [x] Reorder navigation items
 - [ ] Show only available paper types when creating a warehouse category
 - [ ] Test and fix unique category creation
 - [ ] Test and fix unique item creation

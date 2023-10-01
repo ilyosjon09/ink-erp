@@ -17,6 +17,7 @@ class PrintingShop extends Page
     protected static ?string $navigationLabel = 'Печать';
     protected static ?string $navigationGroup = 'Работа';
     protected static ?string $navigationIcon = 'heroicon-o-printer';
+    protected static ?int $navigationSort = 2;
 
     protected static ?string $slug = 'printing-shop';
 

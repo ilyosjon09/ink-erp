@@ -50,6 +50,7 @@ class OrderResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-list';
     protected static ?string $navigationGroup = 'Работа';
+    protected static ?int $navigationSort = 1;
 
     protected static ?string $modelLabel = 'заказ';
     protected static ?string $pluralModelLabel = 'заказы';
