@@ -48,7 +48,7 @@ class WarehouseItemResource extends Resource
                             ->visible(fn (callable $get) => $get('category_id') ? WarehouseItemCategory::query()->findOrFail($get('category_id'))->for_paper : false)
                             ->options(function (callable $get) {
                                 $paperType = WarehouseItemCategory::query()->findOrFail($get('category_id'))->paper_type_id;
-                                return PaperProp::query()->where('paper_type_id', $paperType)->select('grammage')->groupBy('grammage')->get()->pluck('grammage', 'grammage');
+                                return PaperProp::query()->where('paper_type_id', $paperType)->whereRaw("grammage not in (select grammage from warehouse_items wi where wi.category_id = ? )", [$get('category_id')])->select('grammage')->groupBy('grammage')->get()->pluck('grammage', 'grammage');
                             })
                             ->reactive()
                             ->afterStateUpdated(function (callable $get, callable $set, $state) {
@@ -63,6 +63,7 @@ class WarehouseItemResource extends Resource
                             ->label(__('Код'))
                             ->placeholder('000')
                             ->autofocus()
+                            ->unique()
                             ->mask(fn (TextInput\Mask $mask) => $mask->pattern('000'))
                             ->required(),
                         TextInput::make('name')
