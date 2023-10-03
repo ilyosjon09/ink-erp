@@ -73,9 +73,12 @@ class PricesRelationManager extends RelationManager
     {
         return $table
             ->columns([
-                Tables\Columns\TextColumn::make('price')
+                Tables\Columns\TextColumn::make('price_before_1k')
                     ->formatStateUsing(fn ($state): string => $state ? number_format($state, 0, ',', ' ') : '')
-                    ->label(__('Цена')),
+                    ->label(__('Цена до 1000')),
+                Tables\Columns\TextColumn::make('price_after_1k')
+                    ->formatStateUsing(fn ($state): string => $state ? number_format($state, 0, ',', ' ') : '')
+                    ->label(__('Цена после 1000')),
                 Tables\Columns\TextColumn::make('print_type')
                     ->label(__('Краска')),
                 Tables\Columns\TextColumn::make('calc_method')
@@ -84,16 +87,6 @@ class PricesRelationManager extends RelationManager
                         'за штуку',
                     ])
                     ->label(__('Способ расчета')),
-                Tables\Columns\BadgeColumn::make('after_thousand')
-                    ->colors([
-                        'success' => true,
-                        'warning' => false,
-                    ])
-                    ->enum([
-                        'до 1000',
-                        'после 1000',
-                    ])
-                    ->label(__('До/после 1000')),
             ])
             ->filters([
                 TernaryFilter::make('print_type')
