@@ -359,7 +359,7 @@ class OrderResource extends Resource
                     )
                     ->multiple()
                     ->label(__('Статус'))
-                    ->default([OrderStatus::NEW->value])
+                // ->default([OrderStatus::NEW->value])
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
