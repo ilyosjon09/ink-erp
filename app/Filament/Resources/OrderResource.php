@@ -301,12 +301,12 @@ class OrderResource extends Resource
 
                                 $result = $totalTirage == 0 || empty($get('services')) ?
                                     0 : ($totalTirage > 0 ? $totalTirage * $paperPrice : $paperPrice)
-                                    + ($tirage < 1000 ? $servicesPrice : $servicesPrice * $totalTirage)
-                                    + ($formPrices + $cutterPrice);
+                                    + ($tirage < 1000 ? $servicesPrice : $servicesPrice * $totalTirage);
                                 if ($get('profit_percentage')) {
                                     $profitPercentage = ProfitPercentage::findOrFail($get('profit_percentage'))->percentage;
                                     $profit = ($result / 100) * $profitPercentage;
                                     $result += $profit;
+                                    $result += ($formPrices + $cutterPrice);
                                 } else {
                                     $set('per_piece', 0);
                                     return new HtmlString("<span class=\"font-mono text-xl\">0</span>");
