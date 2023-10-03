@@ -2,6 +2,7 @@
 
 namespace App\Filament\Resources;
 
+use App\Enums\WarehouseOperationType;
 use App\Filament\Resources\WarehouseItemResource\Pages;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers\OperationsRelationManager;
@@ -9,8 +10,10 @@ use App\Models\PaperProp;
 use App\Models\WarehouseItem;
 use App\Models\WarehouseItemCategory;
 use Filament\Forms;
+use Filament\Forms\Components\Card;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Hidden;
+use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Form;
@@ -19,6 +22,7 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class WarehouseItemResource extends Resource
@@ -81,9 +85,29 @@ class WarehouseItemResource extends Resource
                             ])
                             ->columnSpanFull()
                             ->required(),
-                        Hidden::make('created_by')->default(auth()->user()->id)
-                    ]
-                )->columnSpan(1)
+                        Hidden::make('created_by')->default(auth()->user()->id),
+                        Grid::make(3)->schema([
+                            Card::make([
+                                Placeholder::make('add')
+                                    ->label(__('Приход'))
+                                    ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::ADD)->sum('amount'))
+                            ])->columnSpan(1),
+                            Card::make([
+                                Placeholder::make('subtract')
+                                    ->label(__('Расход'))
+                                    ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
+                            ])->columnSpan(1),
+                            Card::make([
+                                Placeholder::make('subtract')
+                                    ->label(__('Остаток'))
+                                    ->content(fn (?Model $record) => $record->operations->where(
+                                        'operation',
+                                        WarehouseOperationType::ADD
+                                    )->sum('amount') - $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
+                            ])->columnSpan(1),
+                        ])->visibleOn('edit')
+                    ],
+                )
             ]);
     }
 
@@ -122,5 +146,10 @@ class WarehouseItemResource extends Resource
             'create' => Pages\CreateWarehouseItem::route('/create'),
             'edit' => Pages\EditWarehouseItem::route('/{record}/edit'),
         ];
+    }
+
+    public static function getEloquentQuery(): Builder
+    {
+        return parent::getEloquentQuery()->withCount('operations');
     }
 }

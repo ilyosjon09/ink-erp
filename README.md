@@ -2,9 +2,9 @@
 ### Improvements and bugfixes
 - [x] Reorder navigation items
 - [x] Show only available paper types when creating a warehouse category
-- [ ] Show only available paper grammage when creating a new paper based item
-- [ ] Test and fix unique category creation
-- [ ] Test and fix unique item creation
+- [x] Show only available paper grammage when creating a new paper based item
+- [x] Test and fix unique category creation
+- [x] Test and fix unique item creation
 - [x] Revert income/expense colums into single row layout
 - [ ] Make operations available for individual items
 - [ ] Warn user when there is no item left in warehouse
