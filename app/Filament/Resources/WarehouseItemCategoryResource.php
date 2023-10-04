@@ -19,6 +19,7 @@ use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class WarehouseItemCategoryResource extends Resource
@@ -44,7 +45,7 @@ class WarehouseItemCategoryResource extends Resource
                 )->schema([
                     Select::make('paper_type_id')
                         ->label(__('Тип бумаги'))
-                        ->relationship('paperType', 'name', fn (Builder $query) => $query->whereRaw("id not in (select paper_type_id from warehouse_item_categories)"))
+                        ->relationship('paperType', 'name')
                         ->preload()
                         ->hidden(fn (callable $get) => !$get('for_paper'))
                         ->reactive()
