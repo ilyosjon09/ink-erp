@@ -269,9 +269,10 @@ class OrderResource extends Resource
                             ->reactive()
                             ->content(function (callable $get, callable $set) {
                                 $paperPrice = $get('size') ? (int) PaperProp::select('price')->find($get('size'))->price : 0;
-                                $servicesPrice =  0;
+                                $tirageServicePrice =  0;
+                                $perItemServicePrice =  0;
                                 $tirage = (int)$get('tirage');
-                                $totalAmount = (int)$get('order_amount') * $tirage;
+                                $totalAmount = (int)$get('total_amount');
                                 $totalTirage =  $tirage + (int)$get('additional_tirage');
                                 $formPrices = empty($get('printing_forms')) ? 0 :  PrintingForm::query()
                                     ->when(
@@ -288,20 +289,29 @@ class OrderResource extends Resource
                                         fn (Builder $query) => $query->select('four_zero_price as price')
                                     )->find($get('cutter'))->price : 0;
                                 if (!empty($get('services'))) {
-                                    $servicesPrice = ServicePrice::query()
+                                    $tirageServicePrice = ServicePrice::query()
                                         ->whereIn('service_id', $get('services'))
                                         ->where('print_type', $get('print_type'))
+                                        ->where('calc_method', 0)
                                         ->when(
                                             $tirage < 1000,
                                             fn (Builder $query) => $query->select('price_before_1k as price'),
                                             fn (Builder $query) => $query->select('price_after_1k as price')
                                         )->get()->sum('price');
+                                    $perItemServicePrice = ServicePrice::query()
+                                        ->whereIn('service_id', $get('services'))
+                                        ->where('print_type', $get('print_type'))
+                                        ->where('calc_method', 1)
+                                        ->when(
+                                            $totalAmount < 1000,
+                                            fn (Builder $query) => $query->select('price_before_1k as price'),
+                                            fn (Builder $query) => $query->select('price_after_1k as price')
+                                        )->get()->sum('price');
                                 }
-
-
                                 $result = $totalTirage == 0 || empty($get('services')) ?
                                     0 : ($totalTirage > 0 ? $totalTirage * $paperPrice : $paperPrice)
-                                    + ($tirage < 1000 ? $servicesPrice : $servicesPrice * $totalTirage);
+                                    + ($tirage < 1000 ? $tirageServicePrice : $tirageServicePrice * $totalTirage)
+                                    + ($totalAmount < 1000 ? $perItemServicePrice : $perItemServicePrice * $totalAmount);
                                 if ($get('profit_percentage')) {
                                     $profitPercentage = ProfitPercentage::findOrFail($get('profit_percentage'))->percentage;
                                     $profit = ($result / 100) * $profitPercentage;

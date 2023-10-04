@@ -52,6 +52,8 @@ class EditOrder extends EditRecord
         $printingForms = $this->record->printingForms()
             ->whereNot('name', 'like', '%Пичок%')
             ->get();
+        $services = $this->record->servicePrices->pluck('pivot.service_price_id');
+        // dd($services);
         $data['printing_forms'] = $printingForms->count() > 0 ? $printingForms->pluck('pivot.printing_form_id') : null;
         $cutterId = $this->record->printingForms()->where('name', 'like', '%Пичок%')->get();
         $data['cutter'] =  $cutterId?->first()?->id;
@@ -91,7 +93,6 @@ class EditOrder extends EditRecord
                 fn ($query) => $query->select('id', 'price_after_1k as price'),
                 fn ($query) => $query->select('id', 'price_before_1k as price')
             )->get();
-
         $sd = [];
 
         $servicePrices->each(function ($service) use (&$sd) {
