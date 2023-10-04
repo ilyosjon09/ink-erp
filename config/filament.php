@@ -2,6 +2,7 @@
 
 use App\Filament\Pages\Login;
 use App\Filament\Resources\OrderResource\Widgets\OrdersOverview;
+use App\Filament\Widgets\BrandWidget;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
 use Filament\Http\Middleware\MirrorConfigToSubpackages;
@@ -142,6 +143,7 @@ return [
         'path' => app_path('Filament/Widgets'),
         'register' => [
             Widgets\AccountWidget::class,
+            BrandWidget::class,
             OrdersOverview::class,
         ],
     ],
