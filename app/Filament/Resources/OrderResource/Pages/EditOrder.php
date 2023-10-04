@@ -9,6 +9,7 @@ use App\Models\PrintingForm;
 use App\Models\ServicePrice;
 use Filament\Pages\Actions;
 use Filament\Resources\Pages\EditRecord;
+use Filament\Notifications\Notification;
 
 class EditOrder extends EditRecord
 {
@@ -17,6 +18,17 @@ class EditOrder extends EditRecord
     protected function getActions(): array
     {
         return [
+            Actions\Action::make('accept-order')
+                ->label(__('Отправить на печать'))
+                ->hidden($this->record->status != OrderStatus::NEW)
+                ->action(function () {
+                    $this->record->status = OrderStatus::IN_PRINTING_SHOP;
+                    $this->record->save();
+                    Notification::make()
+                        ->title(__('Заказ успешно отправлен в печать'))
+                        ->success()
+                        ->send();
+                })->requiresConfirmation(),
             Actions\DeleteAction::make(),
         ];
     }
