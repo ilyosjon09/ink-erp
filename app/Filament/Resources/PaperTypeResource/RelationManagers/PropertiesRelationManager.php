@@ -4,6 +4,7 @@ namespace App\Filament\Resources\PaperTypeResource\RelationManagers;
 
 use Filament\Forms;
 use Filament\Forms\Components\Radio;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Form;
 use Filament\Resources\RelationManagers\RelationManager;
@@ -35,7 +36,18 @@ class PropertiesRelationManager extends RelationManager
                 TextInput::make('price')
                     ->label(__('Цена'))
                     ->numeric()
-                    ->required()
+                    ->required(),
+                Select::make('divided_into')
+                    ->options([
+                        1 => '1/1',
+                        2 => '1/2',
+                        3 => '1/3',
+                        4 => '1/4',
+                        5 => '1/5',
+                        6 => '1/6',
+                        7 => '1/7',
+                        8 => '1/8',
+                    ])
             ]);
     }
 
@@ -47,6 +59,10 @@ class PropertiesRelationManager extends RelationManager
                     ->label(__('Граммаж')),
                 Tables\Columns\TextColumn::make('size')
                     ->label(__('Размер')),
+                Tables\Columns\TextColumn::make('divided_into')
+                    ->label(__('Разделение'))
+                    ->alignCenter()
+                    ->formatStateUsing(fn ($state) => '1/' . $state),
                 Tables\Columns\TextColumn::make('price')
                     ->label(__('Цена')),
             ])

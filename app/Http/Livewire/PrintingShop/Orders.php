@@ -76,7 +76,7 @@ class Orders extends Component implements Tables\Contracts\HasTable
                     WarehouseOperation::query()->create([
                         'item_id' => $item->id,
                         'operation' => WarehouseOperationType::SUBTRACT,
-                        'amount' => (int)$record->tirage + (int)$record->additional_tirage,
+                        'amount' => ceil(((int)$record->tirage + (int)$record->additional_tirage) / $record->divided_into),
                         'price' => $price,
                         'comment' => 'Из печатная',
                         'created_by' => auth()->user()->id,

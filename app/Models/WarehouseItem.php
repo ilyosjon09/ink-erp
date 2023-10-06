@@ -20,4 +20,9 @@ class WarehouseItem extends Model
     {
         return $this->belongsTo(WarehouseItemCategory::class, 'category_id');
     }
+
+    public function association()
+    {
+        return $this->morphTo(__FUNCTION__, 'association_type', 'association_id');
+    }
 }

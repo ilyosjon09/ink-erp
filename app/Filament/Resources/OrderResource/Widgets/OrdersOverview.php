@@ -7,6 +7,7 @@ use App\Models\Order;
 use Filament\Widgets\StatsOverviewWidget as BaseWidget;
 use Filament\Widgets\StatsOverviewWidget\Card;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\HtmlString;
 
 class OrdersOverview extends BaseWidget
 {
@@ -28,24 +29,23 @@ class OrdersOverview extends BaseWidget
                     ->count()
             ),
             Card::make(
-                __('Печатаемые заказы'),
-                Order::query()
-                    ->where('status', OrderStatus::IN_PRINTING_SHOP)
-                    ->count()
-            ),
-            Card::make(
-                __('Заказы в цех'),
-                Order::query()
-                    ->where('status', OrderStatus::IN_ASSEMPLY_SHOP)
-                    ->count()
+                __('В процессе'),
+                function () {
+                    $printing = Order::query()
+                        ->where('status', OrderStatus::IN_PRINTING_SHOP)
+                        ->count();
+                    $assembling = Order::query()
+                        ->where('status', OrderStatus::IN_ASSEMPLY_SHOP)
+                        ->count();
+                    return new HtmlString("<span class=\"text-xl flex space-x-4 items-center\"><span>Печ.: {$printing}</span><span>Цех: {$assembling}</span></span>");
+                }
             ),
             Card::make(
                 __('Готовые заказы'),
                 Order::query()
                     ->where('status',  OrderStatus::COMPLETED)
                     ->count()
-            )
-                ->color('success'),
+            )->color('success'),
         ];
     }
 }

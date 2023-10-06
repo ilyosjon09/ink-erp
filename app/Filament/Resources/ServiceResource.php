@@ -14,6 +14,7 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ServiceResource extends Resource
@@ -40,7 +41,14 @@ class ServiceResource extends Resource
     {
         return $table
             ->columns([
-                TextColumn::make('name')->label(__('Название'))
+                TextColumn::make('name')->label(__('Название')),
+                TextColumn::make('prices.price_before_1k')
+                    ->formatStateUsing(fn (?Service $record) => $record->prices->reduce(fn ($prev, $curr) => $prev .= "{$curr->print_type}→{$curr->price_before_1k}, "))
+                    ->label(__('Название')),
+                TextColumn::make('prices.price_after_1k')
+                    ->formatStateUsing(fn (?Service $record) => $record->prices->reduce(fn ($prev, $curr) => $prev .= "{$curr->print_type}→{$curr->price_after_1k}, "))
+                    ->label(__('Название')),
+                TextColumn::make('name')->label(__('Название')),
             ])
             ->filters([
                 //
