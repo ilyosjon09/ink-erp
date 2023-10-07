@@ -1,4 +1,8 @@
 ## Todo
+### High priority tasks
+- [ ] Add division marker for paper props
+- [ ] Add paper based on grammage
+- [ ] Calculate and preserve paper price with order
 ### Improvements and bugfixes
 - [x] Reorder navigation items
 - [x] Show only available paper types when creating a warehouse category

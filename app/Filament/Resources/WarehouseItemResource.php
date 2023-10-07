@@ -7,6 +7,7 @@ use App\Filament\Resources\WarehouseItemResource\Pages;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers\OperationsRelationManager;
 use App\Models\PaperProp;
+use App\Models\PrintingForm;
 use App\Models\WarehouseItem;
 use App\Models\WarehouseItemCategory;
 use Filament\Forms;
@@ -17,6 +18,7 @@ use Filament\Forms\Components\Placeholder;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Form;
+use Illuminate\Support\Str;
 use Filament\Resources\Resource;
 use Filament\Resources\Table;
 use Filament\Tables;
@@ -49,8 +51,28 @@ class WarehouseItemResource extends Resource
                         Select::make('association_type')
                             ->label(__('Связать с'))
                             ->options([
-                                PaperProp::class => 'Тип бумаги',
+                                PaperProp::class => '📄 Тип бумаги',
+                                PrintingForm::class => '🖨️ Печатние формы',
                             ])->reactive(),
+                        Select::make('association_id')
+                            ->label(__('Бумаги'))
+                            ->searchable()
+                            ->reactive()
+                            ->visible(fn (callable $get) => !is_null($get('association_type')))
+                            ->options(
+                                function () {
+                                    $props = PaperProp::query()->with('paperType')->select('id', 'grammage', 'paper_type_id', 'divided_into', 'size')->get();
+                                    return $props->mapWithKeys(fn (PaperProp $prop) => [$prop->id => Str::swap(
+                                        [
+                                            ':name' =>  $prop->paperType->name,
+                                            ':grammage' =>  $prop->grammage,
+                                            ':size' =>  $prop->size,
+                                            ':divided_into' =>  $prop->divided_into,
+                                        ],
+                                        "📄 :name › :grammageгр. › :size (1/:divided_into)"
+                                    )]);
+                                }
+                            )->reactive(),
                         TextInput::make('code')
                             ->label(__('Код'))
                             ->placeholder('000')
