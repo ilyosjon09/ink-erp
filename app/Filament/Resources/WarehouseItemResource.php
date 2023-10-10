@@ -7,6 +7,7 @@ use App\Filament\Resources\WarehouseItemResource\Pages;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers\OperationsRelationManager;
 use App\Models\PaperProp;
+use App\Models\PaperType;
 use App\Models\PrintingForm;
 use App\Models\WarehouseItem;
 use App\Models\WarehouseItemCategory;
@@ -40,7 +41,7 @@ class WarehouseItemResource extends Resource
     {
         return $form
             ->schema([
-                Grid::make(3)->schema(
+                Card::make([Grid::make(3)->schema(
                     [
                         Select::make('category_id')
                             ->label(__('Категория'))
@@ -51,7 +52,7 @@ class WarehouseItemResource extends Resource
                         Select::make('association_type')
                             ->label(__('Связать с'))
                             ->options([
-                                PaperProp::class => '📄 Тип бумаги',
+                                PaperType::class => '📄 Тип бумаги',
                                 PrintingForm::class => '🖨️ Печатние формы',
                             ])->reactive(),
                         Select::make('association_id')
@@ -60,17 +61,10 @@ class WarehouseItemResource extends Resource
                             ->reactive()
                             ->visible(fn (callable $get) => !is_null($get('association_type')))
                             ->options(
-                                function () {
-                                    $props = PaperProp::query()->with('paperType')->select('id', 'grammage', 'paper_type_id', 'divided_into', 'size')->get();
-                                    return $props->mapWithKeys(fn (PaperProp $prop) => [$prop->id => Str::swap(
-                                        [
-                                            ':name' =>  $prop->paperType->name,
-                                            ':grammage' =>  $prop->grammage,
-                                            ':size' =>  $prop->size,
-                                            ':divided_into' =>  $prop->divided_into,
-                                        ],
-                                        "📄 :name › :grammageгр. › :size (1/:divided_into)"
-                                    )]);
+                                function (callable $get) {
+                                    if ($get('association_type') === PaperType::class) {
+                                        $paperTypes = PaperType::query()->with('properties')
+                                    }
                                 }
                             )->reactive(),
                         TextInput::make('code')
@@ -96,28 +90,29 @@ class WarehouseItemResource extends Resource
                             ->columnSpanFull()
                             ->required(),
                         Hidden::make('created_by')->default(auth()->user()->id),
-                        Grid::make(3)->schema([
-                            Card::make([
-                                Placeholder::make('add')
-                                    ->label(__('Приход'))
-                                    ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::ADD)->sum('amount'))
-                            ])->columnSpan(1),
-                            Card::make([
-                                Placeholder::make('subtract')
-                                    ->label(__('Расход'))
-                                    ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
-                            ])->columnSpan(1),
-                            Card::make([
-                                Placeholder::make('subtract')
-                                    ->label(__('Остаток'))
-                                    ->content(fn (?Model $record) => $record->operations->where(
-                                        'operation',
-                                        WarehouseOperationType::ADD
-                                    )->sum('amount') - $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
-                            ])->columnSpan(1),
-                        ])->visibleOn('edit')
                     ],
-                )
+                )]),
+
+                Grid::make(3)->schema([
+                    Card::make([
+                        Placeholder::make('add')
+                            ->label(__('Приход'))
+                            ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::ADD)->sum('amount'))
+                    ])->columnSpan(1),
+                    Card::make([
+                        Placeholder::make('subtract')
+                            ->label(__('Расход'))
+                            ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
+                    ])->columnSpan(1),
+                    Card::make([
+                        Placeholder::make('subtract')
+                            ->label(__('Остаток'))
+                            ->content(fn (?Model $record) => $record->operations->where(
+                                'operation',
+                                WarehouseOperationType::ADD
+                            )->sum('amount') - $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
+                    ])->columnSpan(1),
+                ])->visibleOn('edit'),
             ]);
     }
 
