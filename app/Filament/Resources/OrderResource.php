@@ -109,7 +109,11 @@ class OrderResource extends Resource
                                     if (!$grammage) {
                                         return [];
                                     }
-                                    return PaperProp::select('id', 'size')->where('grammage', $grammage)->where('paper_type_id', $paperTypeId)->get()->pluck('size', 'id');
+                                    return PaperProp::select('id', 'size', 'divided_into')
+                                        ->where('grammage', $grammage)
+                                        ->where('paper_type_id', $paperTypeId)
+                                        ->get()
+                                        ->mapWithKeys(fn ($prop) => [$prop->id => "{$prop->size} [1/{$prop->divided_into}]"]);
                                 })
                                 ->disabled(fn (callable $get) => !(bool) $get('grammage'))
                                 ->required(),

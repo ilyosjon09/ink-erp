@@ -41,32 +41,31 @@ class WarehouseItemResource extends Resource
     {
         return $form
             ->schema([
-                Card::make([Grid::make(3)->schema(
+                Grid::make(3)->schema(
                     [
                         Select::make('category_id')
                             ->label(__('Категория'))
                             ->relationship('category', 'name')
                             ->preload()
                             ->searchable()
-                            ->columnSpan(1),
-                        Select::make('association_type')
-                            ->label(__('Связать с'))
-                            ->options([
-                                PaperType::class => '📄 Тип бумаги',
-                                PrintingForm::class => '🖨️ Печатние формы',
-                            ])->reactive(),
-                        Select::make('association_id')
-                            ->label(__('Бумаги'))
-                            ->searchable()
                             ->reactive()
-                            ->visible(fn (callable $get) => !is_null($get('association_type')))
-                            ->options(
-                                function (callable $get) {
-                                    if ($get('association_type') === PaperType::class) {
-                                        $paperTypes = PaperType::query()->with('properties')
-                                    }
+                            ->columnSpan(fn ($state) => $state ? (WarehouseItemCategory::query()->findOrFail($state)->for_paper ? 2 : 3) : 3),
+                        Select::make('grammage')
+                            ->label(__('Граммаж'))
+                            ->visible(fn (callable $get) => $get('category_id') ? WarehouseItemCategory::query()->findOrFail($get('category_id'))->for_paper : false)
+                            ->options(function (callable $get) {
+                                $paperType = WarehouseItemCategory::query()->findOrFail($get('category_id'))->paper_type_id;
+                                return PaperProp::query()->where('paper_type_id', $paperType)->whereRaw("grammage not in (select grammage from warehouse_items wi where wi.category_id = ? )", [$get('category_id')])->select('grammage')->groupBy('grammage')->get()->pluck('grammage', 'grammage');
+                            })
+                            ->reactive()
+                            ->afterStateUpdated(function (callable $get, callable $set, $state) {
+                                $category = WarehouseItemCategory::query()->findOrFail($get('category_id'));
+
+                                if ($category->for_paper) {
+                                    $set('name', $state);
                                 }
-                            )->reactive(),
+                            })
+                            ->preload(),
                         TextInput::make('code')
                             ->label(__('Код'))
                             ->placeholder('000')
@@ -90,29 +89,28 @@ class WarehouseItemResource extends Resource
                             ->columnSpanFull()
                             ->required(),
                         Hidden::make('created_by')->default(auth()->user()->id),
+                        Grid::make(3)->schema([
+                            Card::make([
+                                Placeholder::make('add')
+                                    ->label(__('Приход'))
+                                    ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::ADD)->sum('amount'))
+                            ])->columnSpan(1),
+                            Card::make([
+                                Placeholder::make('subtract')
+                                    ->label(__('Расход'))
+                                    ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
+                            ])->columnSpan(1),
+                            Card::make([
+                                Placeholder::make('subtract')
+                                    ->label(__('Остаток'))
+                                    ->content(fn (?Model $record) => $record->operations->where(
+                                        'operation',
+                                        WarehouseOperationType::ADD
+                                    )->sum('amount') - $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
+                            ])->columnSpan(1),
+                        ])->visibleOn('edit')
                     ],
-                )]),
-
-                Grid::make(3)->schema([
-                    Card::make([
-                        Placeholder::make('add')
-                            ->label(__('Приход'))
-                            ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::ADD)->sum('amount'))
-                    ])->columnSpan(1),
-                    Card::make([
-                        Placeholder::make('subtract')
-                            ->label(__('Расход'))
-                            ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
-                    ])->columnSpan(1),
-                    Card::make([
-                        Placeholder::make('subtract')
-                            ->label(__('Остаток'))
-                            ->content(fn (?Model $record) => $record->operations->where(
-                                'operation',
-                                WarehouseOperationType::ADD
-                            )->sum('amount') - $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
-                    ])->columnSpan(1),
-                ])->visibleOn('edit'),
+                )
             ]);
     }
 
