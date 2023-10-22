@@ -2,7 +2,7 @@
 ### High priority tasks
 - [x] Add division marker for paper props
 - [ ] Add paper based on grammage
-- [ ] Cash office
+- [x] Cash office
   - [ ] Client accounts
   - [ ] Cash accounts
 - [ ] Report
