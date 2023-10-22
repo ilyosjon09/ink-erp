@@ -3,7 +3,7 @@
 namespace App\Http\Livewire\PrintingShop;
 
 use App\Enums\OrderStatus;
-use App\Enums\WarehouseOperationType;
+use App\Enums\OperationType;
 use App\Models\Order;
 use App\Models\WarehouseItem;
 use App\Models\WarehouseItemCategory;
@@ -71,10 +71,11 @@ class Orders extends Component implements Tables\Contracts\HasTable
                     $category = WarehouseItemCategory::query()->with('items')->where('paper_type_id', $record->paperProperties->paperType->id)->first();
 
                     $item = $category->items->where('grammage', $record->paperProperties->grammage)->first();
-                    $price = WarehouseOperation::query()->where('item_id', $item->id)->latest()->first()->price;
+                    $warehouseItem =  WarehouseOperation::query()->where('item_id', $item->id)->latest()->first();
+                    $price = $warehouseItem->price;
                     WarehouseOperation::query()->create([
                         'item_id' => $item->id,
-                        'operation' => WarehouseOperationType::SUBTRACT,
+                        'operation' => OperationType::SUBTRACT,
                         'amount' => ceil(((int)$record->tirage + (int)$record->additional_tirage) / $record->paperProperties->divided_into),
                         'price' => $price,
                         'comment' => 'Из печатная',

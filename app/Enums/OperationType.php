@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum WarehouseOperationType: int
+enum OperationType: int
 {
     case ADD = 0;
     case SUBTRACT = 1;

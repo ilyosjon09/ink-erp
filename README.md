@@ -2,6 +2,17 @@
 ### High priority tasks
 - [x] Add division marker for paper props
 - [ ] Add paper based on grammage
+- [ ] Cash office
+  - [ ] Client accounts
+  - [ ] Cash accounts
+- [ ] Report
+  - [ ] Cash office report
+    - [ ] Income
+    - [ ] Expsense
+  - [ ] Warehouse items report
+    - [ ] Paper profit
+    - [ ] Paint profit
+    - [ ] Printing form profit
 - [ ] Calculate and preserve paper price with order
 ### Improvements and bugfixes
 - [x] Reorder navigation items

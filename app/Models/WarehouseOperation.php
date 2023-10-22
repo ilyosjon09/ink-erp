@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Enums\WarehouseOperationType;
+use App\Enums\OperationType;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -12,7 +12,7 @@ class WarehouseOperation extends Model
 
     protected $guarded = [];
     protected $casts = [
-        'operation' => WarehouseOperationType::class,
+        'operation' => OperationType::class,
     ];
 
     public function item()

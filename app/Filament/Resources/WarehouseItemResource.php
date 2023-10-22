@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\WarehouseOperationType;
+use App\Enums\OperationType;
 use App\Filament\Resources\WarehouseItemResource\Pages;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers;
 use App\Filament\Resources\WarehouseItemResource\RelationManagers\OperationsRelationManager;
@@ -93,20 +93,20 @@ class WarehouseItemResource extends Resource
                             Card::make([
                                 Placeholder::make('add')
                                     ->label(__('Приход'))
-                                    ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::ADD)->sum('amount'))
+                                    ->content(fn (?Model $record) => $record->operations->where('operation', OperationType::ADD)->sum('amount'))
                             ])->columnSpan(1),
                             Card::make([
                                 Placeholder::make('subtract')
                                     ->label(__('Расход'))
-                                    ->content(fn (?Model $record) => $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
+                                    ->content(fn (?Model $record) => $record->operations->where('operation', OperationType::SUBTRACT)->sum('amount'))
                             ])->columnSpan(1),
                             Card::make([
                                 Placeholder::make('subtract')
                                     ->label(__('Остаток'))
                                     ->content(fn (?Model $record) => $record->operations->where(
                                         'operation',
-                                        WarehouseOperationType::ADD
-                                    )->sum('amount') - $record->operations->where('operation', WarehouseOperationType::SUBTRACT)->sum('amount'))
+                                        OperationType::ADD
+                                    )->sum('amount') - $record->operations->where('operation', OperationType::SUBTRACT)->sum('amount'))
                             ])->columnSpan(1),
                         ])->visibleOn('edit')
                     ],

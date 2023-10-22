@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources;
 
-use App\Enums\WarehouseOperationType;
+use App\Enums\OperationType;
 use App\Filament\Resources\WarehouseOperationResource\Pages;
 use App\Filament\Resources\WarehouseOperationResource\RelationManagers;
 use App\Models\WarehouseItem;
@@ -77,7 +77,7 @@ class WarehouseOperationResource extends Resource
                 Radio::make('operation')
                     ->label(__('Тип'))
                     ->options(
-                        collect(WarehouseOperationType::cases())->mapWithKeys(fn (WarehouseOperationType $case, $key) => [$case->value => $case->label()])
+                        collect(OperationType::cases())->mapWithKeys(fn (OperationType $case, $key) => [$case->value => $case->label()])
                     )
                     ->required()
                     ->columnSpanFull(),
@@ -110,10 +110,10 @@ class WarehouseOperationResource extends Resource
                     ->label(__('Товар')),
                 Tables\Columns\BadgeColumn::make('operation')
                     ->label(__('Тип'))
-                    ->formatStateUsing(fn ($state) => WarehouseOperationType::from($state)->label())
+                    ->formatStateUsing(fn ($state) => OperationType::from($state)->label())
                     ->colors([
-                        'success' => WarehouseOperationType::ADD->value,
-                        'danger' => WarehouseOperationType::SUBTRACT->value,
+                        'success' => OperationType::ADD->value,
+                        'danger' => OperationType::SUBTRACT->value,
                     ]),
                 Tables\Columns\TextColumn::make('amount')
                     ->label(__('Количество'))

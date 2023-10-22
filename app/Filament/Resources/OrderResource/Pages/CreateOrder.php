@@ -33,6 +33,7 @@ class CreateOrder extends CreateRecord
             'amount_per_paper' => $data['amount_per_paper'],
             'amount' => $data['order_amount'],
             'print_type' => $data['print_type'],
+            'agreed_price' => $data['agreed_price'],
             'paper_price' => PaperProp::find($data['size'])->price,
             'tirage' => $data['tirage'],
             'profit_percentage_id' => $data['profit_percentage'],

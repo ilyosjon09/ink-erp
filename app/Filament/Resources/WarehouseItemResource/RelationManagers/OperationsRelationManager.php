@@ -2,7 +2,7 @@
 
 namespace App\Filament\Resources\WarehouseItemResource\RelationManagers;
 
-use App\Enums\WarehouseOperationType;
+use App\Enums\OperationType;
 use App\Filament\Resources\OrderResource\Widgets\OrdersOverview;
 use App\Models\WarehouseOperation;
 use Filament\Forms;
@@ -40,10 +40,10 @@ class OperationsRelationManager extends RelationManager
                     ->formatStateUsing(fn ($state) => $state->format('d.m.Y')),
                 Tables\Columns\BadgeColumn::make('operation')
                     ->label(__('Тип'))
-                    ->formatStateUsing(fn ($state) => WarehouseOperationType::from($state)->label())
+                    ->formatStateUsing(fn ($state) => OperationType::from($state)->label())
                     ->colors([
-                        'success' => WarehouseOperationType::ADD->value,
-                        'danger' => WarehouseOperationType::SUBTRACT->value,
+                        'success' => OperationType::ADD->value,
+                        'danger' => OperationType::SUBTRACT->value,
                     ]),
                 Tables\Columns\TextColumn::make('amount')
                     ->alignRight()

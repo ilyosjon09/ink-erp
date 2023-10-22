@@ -268,6 +268,9 @@ class OrderResource extends Resource
                             ->image(),
                     ]),
                     Card::make([
+                        TextInput::make('agreed_price')
+                            ->label(__('Согласованная цена'))
+                            ->reactive(),
                         Placeholder::make('total')
                             ->label(__('Всего к оплате'))
                             ->reactive()
@@ -327,6 +330,9 @@ class OrderResource extends Resource
                                 }
                                 if ($get('total_amount') > 0) {
                                     $set('per_piece', $result / $get('total_amount'));
+                                }
+                                if (!$get('agreed_price')) {
+                                    $set('agreed_price', $result);
                                 }
                                 $result = number_format(ceil($result), 0, ', ', ' ');
                                 return new HtmlString("<span class=\"font-mono text-xl\">{$result}</span>");
