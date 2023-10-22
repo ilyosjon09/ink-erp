@@ -1,6 +1,6 @@
 ## Todo
 ### High priority tasks
-- [ ] Add division marker for paper props
+- [x] Add division marker for paper props
 - [ ] Add paper based on grammage
 - [ ] Calculate and preserve paper price with order
 ### Improvements and bugfixes
@@ -12,8 +12,8 @@
 - [x] Revert income/expense colums into single row layout
 - [ ] Make operations available for individual items
 - [ ] Warn user when there is no item left in warehouse
-- [ ] Protect all actions and pages with permissions
-- [ ] Apply correct permissions for all roles
+- [x] Protect all actions and pages with permissions
+- [x] Apply correct permissions for all roles
 ### New features
 - [ ] Show warehouse stats on operatios page
 - [ ] Show/add/subtract loans of clients

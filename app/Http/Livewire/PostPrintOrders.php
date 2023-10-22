@@ -135,30 +135,7 @@ class PostPrintOrders extends Component implements Tables\Contracts\HasTable
                                             ->reactive()
                                     )
                                     ->toArray();
-                            }),
-                        Fieldset::make('printing_forms')
-                            ->hidden(fn (Order $record) => $record->printingForms()->get()->isEmpty())
-                            ->label(__('Печатные формы'))
-                            ->columnSpan(1)
-                            ->columns(1)
-                            ->childComponents(function (Order $record) {
-                                return $record->printingForms()
-                                    ->get()
-                                    ->map(
-                                        fn ($printingForm) => Toggle::make('printing_forms.' . $printingForm->id)
-                                            ->label(__($printingForm->name))
-                                            ->onIcon('heroicon-o-check')
-                                            ->offIcon('heroicon-o-x')
-                                            ->hint(fn ($state) => $state ? __('Готово') : __('Не готово'))
-                                            ->hintColor(fn ($state) =>  $state ? 'success' : 'secondary')
-                                            ->afterStateUpdated(function (?Order $record, Components\Component $component, $state) {
-                                                $id = (int)collect(explode('.', $component->getId()))->last();
-                                                $record->printingForms()->updateExistingPivot($id, ['completed' => (bool) $state]);
-                                            })
-                                            ->reactive()
-                                    )
-                                    ->toArray();
-                            }),
+                            })
                     ])
                 ])
                 ->modalButton(__('OK'))
@@ -166,11 +143,10 @@ class PostPrintOrders extends Component implements Tables\Contracts\HasTable
             Action::make('done')
                 ->label(__('Готово'))
                 ->action(function (Order $record) {
-                    $record->load(['servicePrices', 'printingForms']);
-                    $printingForms = $record->printingForms->pluck('pivot.completed');
+                    $record->load(['servicePrices']);
                     $servicePrices = $record->servicePrices->pluck('pivot.completed');
 
-                    if (!$servicePrices->merge($printingForms)->every(fn ($item) => $item)) {
+                    if (!$servicePrices->every(fn ($item) => $item)) {
                         return;
                     }
 
@@ -182,11 +158,10 @@ class PostPrintOrders extends Component implements Tables\Contracts\HasTable
                         ->send();
                 })
                 ->disabled(function (Order $record) {
-                    $record->load(['servicePrices', 'printingForms']);
-                    $printingForms = $record->printingForms->pluck('pivot.completed');
+                    $record->load(['servicePrices']);
                     $servicePrices = $record->servicePrices->pluck('pivot.completed');
 
-                    return !$servicePrices->merge($printingForms)->every(fn ($item) => $item);
+                    return !$servicePrices->every(fn ($item) => $item);
                 })
                 ->requiresConfirmation()
                 ->button()

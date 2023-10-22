@@ -9,6 +9,7 @@ use App\Models\PaperType;
 use App\Models\Service;
 use App\Models\ServicePrice;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -19,13 +20,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // $this->permissions();
+        $this->permissions();
 
-        $superadmin = Role::query()->where('name', 'Суперадмин')->first();
-        $superadmin->syncPermissions(Permission::all());
+        // $superadmin = Role::query()->where('name', 'Суперадмин')->first();
+        // $superadmin->syncPermissions(Permission::all());
     }
     protected function permissions(): void
     {
+        Permission::destroy(Permission::all(['id'])->pluck('id')->toArray());
         Permission::query()->insert([
             [
                 'name' => 'order.create',
@@ -88,11 +90,40 @@ class DatabaseSeeder extends Seeder
                 'guard_name' => 'web'
             ],
             [
-                'name' => 'dictionaries',
+                'name' => 'dictionary.view',
                 'guard_name' => 'web'
-            ]
+            ],
+            [
+                'name' => 'print_shop.view',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'post_print_shop.view',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'warehouse.view',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'cash_office.view',
+                'guard_name' => 'web'
+            ],
+            [
+                'name' => 'reports.view',
+                'guard_name' => 'web'
+            ],
         ]);
 
+        Role::destroy(Role::all('id')->pluck('id')->toArray());
+        Role::create([
+            'name' => 'Суперадмин',
+            'guard_name' => 'web',
+        ]);
+        Role::create([
+            'name' => 'Менеджер',
+            'guard_name' => 'web',
+        ]);
         $superadmin = Role::query()->where('name', 'Суперадмин')->first();
 
         $superadmin->syncPermissions(Permission::all());

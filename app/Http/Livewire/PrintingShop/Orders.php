@@ -72,11 +72,10 @@ class Orders extends Component implements Tables\Contracts\HasTable
 
                     $item = $category->items->where('grammage', $record->paperProperties->grammage)->first();
                     $price = WarehouseOperation::query()->where('item_id', $item->id)->latest()->first()->price;
-
                     WarehouseOperation::query()->create([
                         'item_id' => $item->id,
                         'operation' => WarehouseOperationType::SUBTRACT,
-                        'amount' => ceil(((int)$record->tirage + (int)$record->additional_tirage) / $record->divided_into),
+                        'amount' => ceil(((int)$record->tirage + (int)$record->additional_tirage) / $record->paperProperties->divided_into),
                         'price' => $price,
                         'comment' => 'Из печатная',
                         'created_by' => auth()->user()->id,

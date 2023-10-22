@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Spatie\Permission\Models\Permission;
 use Filament\Tables\Actions\AttachAction;
-
+use Illuminate\Database\Eloquent\Model;
 
 class PermissionsRelationManager extends RelationManager
 {
@@ -45,9 +45,7 @@ class PermissionsRelationManager extends RelationManager
             ])
             ->headerActions([
                 Tables\Actions\AttachAction::make()
-                    ->recordSelect(function (Select $select) {
-                        return $select;
-                    })
+                    ->recordTitle(fn ($record) => __($record->name))
                     ->preloadRecordSelect()
             ])
             ->actions([

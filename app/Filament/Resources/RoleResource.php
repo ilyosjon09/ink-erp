@@ -29,6 +29,7 @@ class RoleResource extends Resource
                 Card::make([
                     TextInput::make('name')
                         ->label(__('Название'))
+                        ->disabledOn('edit')
                         ->required()
                 ])->columns(3)
             ]);
