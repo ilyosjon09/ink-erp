@@ -43,6 +43,8 @@ class WarehouseItemCategoryResource extends Resource
                 Grid::make(
                     1
                 )->schema([
+                    Select::make('bindable_id'),
+                    Select::make('bindable_type'),
                     Select::make('paper_type_id')
                         ->label(__('Тип бумаги'))
                         ->relationship('paperType', 'name')
