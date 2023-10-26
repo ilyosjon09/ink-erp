@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         Filament::registerRenderHook('user-menu.start', function () {
-            return Blade::render('<span>sava</span>');
+            return Blade::render('<livewire:operday-status />');
         });
 
         Filament::serving(function () {
