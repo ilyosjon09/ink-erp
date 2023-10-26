@@ -5,6 +5,7 @@ namespace App\Providers;
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
 use Illuminate\Support\ServiceProvider;
+use Opcodes\LogViewer\Facades\LogViewer;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,18 +22,22 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        LogViewer::auth(function ($request) {
+            return auth()->check();
+        });
+
         Filament::serving(function () {
             Filament::registerNavigationGroups([
                 NavigationGroup::make()
-                    ->label(_('Работа')),
+                    ->label(__('Работа')),
                 NavigationGroup::make()
-                    ->label(_('Касса')),
+                    ->label(__('Ка1сса')),
                 NavigationGroup::make()
-                    ->label(_('Склад')),
+                    ->label(__('Склад')),
                 NavigationGroup::make()
-                    ->label(_('Админ')),
+                    ->label(__('Админ')),
                 NavigationGroup::make()
-                    ->label(_('Справочники')),
+                    ->label(__('Справочники')),
             ]);
         });
     }

@@ -5,15 +5,21 @@
 - [x] Cash office
   - [ ] Client accounts
   - [ ] Cash accounts
+  - [ ] Categories
 - [ ] Report
+  - [ ] Generate report for given month
   - [ ] Cash office report
     - [ ] Income
     - [ ] Expsense
   - [ ] Warehouse items report
     - [ ] Paper profit
     - [ ] Paint profit
-    - [ ] Printing form profit
+    - [ ] Printing form profit 
 - [ ] Calculate and preserve paper price with order
+- [ ] Operday
+  - [ ] Connect every transactional action to a operday
+  - [ ] Calculate balances of warehouse and cash office using operaday
+  - [ ] Summarize reports by operday
 ### Improvements and bugfixes
 - [x] Reorder navigation items
 - [x] Show only available paper types when creating a warehouse category

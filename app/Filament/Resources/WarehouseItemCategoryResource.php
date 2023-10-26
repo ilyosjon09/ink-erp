@@ -3,11 +3,8 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\WarehouseItemCategoryResource\Pages;
-use App\Filament\Resources\WarehouseItemCategoryResource\RelationManagers;
 use App\Models\PaperType;
 use App\Models\WarehouseItemCategory;
-use Filament\Forms;
-use Filament\Forms\Components\Checkbox;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
@@ -18,9 +15,6 @@ use Filament\Resources\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\TextColumn;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class WarehouseItemCategoryResource extends Resource
 {
@@ -51,7 +45,7 @@ class WarehouseItemCategoryResource extends Resource
                         ->preload()
                         ->hidden(fn (callable $get) => !$get('for_paper'))
                         ->reactive()
-                        ->afterStateUpdated(fn ($state, callable $set) => $set('name', PaperType::query()->findOrFail((int)$state)->name))
+                        ->afterStateUpdated(callback: fn ($state, callable $set) => $set('name', PaperType::query()->findOrFail((int)$state)->name))
                         ->searchable(),
                     TextInput::make('name')
                         ->label(__('Название'))
@@ -105,4 +99,6 @@ class WarehouseItemCategoryResource extends Resource
             'edit' => Pages\EditWarehouseItemCategory::route('/{record}/edit'),
         ];
     }
+
+
 }
