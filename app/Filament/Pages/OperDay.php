@@ -2,7 +2,7 @@
 
 namespace App\Filament\Pages;
 
-use App\Filament\Widgets\OperDayOverview;
+use App\Filament\Pages\Widgets\OperDayOverview;
 use Filament\Pages\Actions\Action;
 use Filament\Pages\Page;
 use App\Models\OperDay as OperDayModel;
@@ -25,14 +25,11 @@ class OperDay extends Page
     protected static ?string $navigationLabel = 'Опердень';
     public OperDayModel $currentOperDay;
     public bool $closed;
+    protected $listeners = ['refresh-operday-widget' => 'refreshOperDay'];
 
     public function mount(): void
     {
-        $currentOperDay = OperDayModel::query()->when(
-            OperDayModel::query()->where('closed', false)->count() === 1,
-            callback: fn ($query) => $query->where('closed', false),
-            default: fn ($query) => $query->orderBy('operday', 'desc')
-        )->first();
+        $currentOperDay = OperDayModel::query()->whereIsCurrent(true)->first();
 
         $this->currentOperDay = $currentOperDay;
         $this->closed = $currentOperDay->closed;
@@ -51,18 +48,40 @@ class OperDay extends Page
             // Open operday
             Action::make('open-operday')
                 ->label(__('Открыт опердень'))
+                ->hidden(!$this->currentOperDay->closed)
                 ->form([
                     DatePicker::make('operday')
+                        ->withoutTime()
+                        ->minDate($this->currentOperDay->operday->addDay())
+                        ->default($this->currentOperDay->operday->addDay())
+                        ->displayFormat('d.m.Y')
                         ->label(__('Опердень'))
                 ])
                 ->action(function ($data) {
+                    $this->currentOperDay->refresh();
+                    $this->currentOperDay->update(['is_current' => false]);
+
+                    $operday = new OperDayModel;
+                    $operday->operday = $data['operday'];
+                    $operday->closed = false;
+                    $operday->is_current = true;
+                    $operday->created_by = auth()->id();
+                    $operday->updated_by = auth()->id();
+                    if ($operday->save()) {
+                        Notification::make('operday-closed')
+                            ->body(__("Опердень {$operday->operday->format('d.m.Y')} был успешно открыт"))
+                            ->success()
+                            ->send();
+                    }
                 })
                 ->modalButton(__('Открыт опердень'))
                 ->modalSubheading('Вы уверены, что хотели бы открыт опердень? Этого нельзя отменить.')
                 ->modalWidth('sm')
-                ->color('secondary'),
+                ->color('secondary')
+                ->after(fn ($livewire) => $livewire->emit('refresh-operday-widget')),
             // Close operday
             Action::make('close-operday')
+                ->hidden($this->currentOperDay->closed)
                 ->label(__('Закрыт опердень'))
                 ->mountUsing(fn (ComponentContainer $form) => $form->fill([
                     'operDayId' => $this->currentOperDay->id,
@@ -71,6 +90,7 @@ class OperDay extends Page
                     $operDay = OperDayModel::query()->find($data['operDayId']);
                     $operDay->closed = true;
                     if ($operDay->save()) {
+                        $this->currentOperDay = $operDay;
                         Notification::make('operday-closed')
                             ->body(__("Опердень {$operDay->operday->format('d.m.Y')} был успешно закрыт"))
                             ->success()
@@ -86,6 +106,14 @@ class OperDay extends Page
                 ->modalSubheading('Вы уверены, что хотели бы закрыт опердень? Этого нельзя отменить.')
                 ->modalWidth('sm')
                 ->color('danger')
+                ->after(fn ($livewire) => $livewire->emit('refresh-operday-widget'))
         ];
+    }
+
+    public function refreshOperDay()
+    {
+        $currentOperDay = OperDayModel::query()->whereIsCurrent(true)->first();
+
+        $this->currentOperDay = $currentOperDay;
     }
 }

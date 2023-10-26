@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Filament\Facades\Filament;
 use Filament\Navigation\NavigationGroup;
+use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Opcodes\LogViewer\Facades\LogViewer;
 
@@ -24,6 +25,10 @@ class AppServiceProvider extends ServiceProvider
     {
         LogViewer::auth(function ($request) {
             return auth()->check();
+        });
+
+        Filament::registerRenderHook('user-menu.start', function () {
+            return Blade::render('<span>sava</span>');
         });
 
         Filament::serving(function () {
