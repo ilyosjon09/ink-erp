@@ -20,9 +20,4 @@ class PaperProp extends Model
     {
         return $this->hasMany(Order::class, 'paper_prop_id');
     }
-
-    public function warehouseItem()
-    {
-        return $this->morphOne(WarehouseItem::class, 'association');
-    }
 }

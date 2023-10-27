@@ -49,23 +49,8 @@ class WarehouseItemResource extends Resource
                             ->preload()
                             ->searchable()
                             ->reactive()
-                            ->columnSpan(fn ($state) => $state ? (WarehouseItemCategory::query()->findOrFail($state)->for_paper ? 2 : 3) : 3),
+                            ->columnSpanFull(),
                         Select::make('grammage')
-                            ->label(__('Граммаж'))
-                            ->visible(fn (callable $get) => $get('category_id') ? WarehouseItemCategory::query()->findOrFail($get('category_id'))->for_paper : false)
-                            ->options(function (callable $get) {
-                                $paperType = WarehouseItemCategory::query()->findOrFail($get('category_id'))->paper_type_id;
-                                return PaperProp::query()->where('paper_type_id', $paperType)->whereRaw("grammage not in (select grammage from warehouse_items wi where wi.category_id = ? )", [$get('category_id')])->select('grammage')->groupBy('grammage')->get()->pluck('grammage', 'grammage');
-                            })
-                            ->reactive()
-                            ->afterStateUpdated(function (callable $get, callable $set, $state) {
-                                $category = WarehouseItemCategory::query()->findOrFail($get('category_id'));
-
-                                if ($category->for_paper) {
-                                    $set('name', $state);
-                                }
-                            })
-                            ->preload(),
                         TextInput::make('code')
                             ->label(__('Код'))
                             ->placeholder('000')
@@ -110,7 +95,7 @@ class WarehouseItemResource extends Resource
                             ])->columnSpan(1),
                         ])->visibleOn('edit')
                     ],
-                )
+                )->maxWidth('2xl')
             ]);
     }
 

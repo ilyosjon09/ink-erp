@@ -6,6 +6,7 @@ use App\Filament\Resources\ServiceResource\Pages;
 use App\Filament\Resources\ServiceResource\RelationManagers;
 use App\Filament\Resources\ServiceResource\RelationManagers\PricesRelationManager;
 use App\Models\Service;
+use Illuminate\Support\Str;
 use Filament\Forms;
 use Filament\Forms\Components\TextInput;
 use Filament\Resources\Form;
@@ -43,11 +44,11 @@ class ServiceResource extends Resource
             ->columns([
                 TextColumn::make('name')->label(__('Название')),
                 TextColumn::make('prices.price_before_1k')
-                    ->formatStateUsing(fn (?Service $record) => $record->prices->reduce(fn ($prev, $curr) => $prev .= "{$curr->print_type}→{$curr->price_before_1k}, "))
-                    ->label(__('Название')),
+                    ->formatStateUsing(fn (?Service $record) => Str::of($record->prices->reduce(fn ($prev, $curr) => $prev .= "{$curr->print_type}→{$curr->price_before_1k}, "))->rtrim(', '))
+                    ->label(__('Цена до 1000')),
                 TextColumn::make('prices.price_after_1k')
-                    ->formatStateUsing(fn (?Service $record) => $record->prices->reduce(fn ($prev, $curr) => $prev .= "{$curr->print_type}→{$curr->price_after_1k}, "))
-                    ->label(__('Название')),
+                    ->formatStateUsing(fn (?Service $record) => Str::of($record->prices->reduce(fn ($prev, $curr) => $prev .= "{$curr->print_type}→{$curr->price_after_1k}, "))->rtrim(', '))
+                    ->label(__('Цена после 1000')),
                 TextColumn::make('name')->label(__('Название')),
             ])
             ->filters([

@@ -3,7 +3,9 @@
 namespace App\Filament\Resources;
 
 use App\Filament\Resources\WarehouseItemCategoryResource\Pages;
+use App\Models\PaperProp;
 use App\Models\PaperType;
+use App\Models\PrintingForm;
 use App\Models\WarehouseItemCategory;
 use Filament\Forms\Components\Grid;
 use Filament\Forms\Components\Select;
@@ -29,27 +31,32 @@ class WarehouseItemCategoryResource extends Resource
     {
         return $form
             ->schema([
-                Toggle::make('for_paper')
-                    ->label('Привязать к типу бумаги')
-                    ->inline(false)
-                    ->columnSpanFull()
-                    ->reactive(),
                 Grid::make(
                     1
                 )->schema([
-                    Select::make('bindable_id'),
-                    Select::make('bindable_type'),
-                    Select::make('paper_type_id')
-                        ->label(__('Тип бумаги'))
-                        ->relationship('paperType', 'name')
-                        ->preload()
-                        ->hidden(fn (callable $get) => !$get('for_paper'))
+                    Select::make('bindable_type')
+                        ->label(__('Связать с'))
+                        ->options([
+                            PaperType::class => __('📄 Бумага'),
+                            PrintingForm::class => __('🖨️ Печатьние формы')
+                        ])->reactive(),
+                    Select::make('bindable_id')
                         ->reactive()
-                        ->afterStateUpdated(callback: fn ($state, callable $set) => $set('name', PaperType::query()->findOrFail((int)$state)->name))
-                        ->searchable(),
+                        ->required(fn (callable $get) => $get('bindable_type') === PaperType::class)
+                        ->label(__('Тип'))
+                        ->options(fn () => PaperType::query()->select(['id', 'name'])->get()->mapWithKeys(fn ($paperType) => [$paperType->id => $paperType->name]))
+                        ->hidden(fn (callable $get) => $get('bindable_type') !== PaperType::class)
+                        ->afterStateUpdated(callback: fn ($state, callable $set) => $set('name', PaperType::query()->findOrFail((int)$state)->name)),
+                    Select::make('bindable_id')
+                        ->required(fn (callable $get) => $get('bindable_type') === PrintingForm::class)
+                        ->label(__('Форма'))
+                        ->reactive()
+                        ->options(fn () => PrintingForm::query()->select(['id', 'name'])->get()->mapWithKeys(fn ($paperType) => [$paperType->id => $paperType->name]))
+                        ->hidden(fn (callable $get) => $get('bindable_type') !== PrintingForm::class)
+                        ->afterStateUpdated(callback: fn ($state, callable $set) => $set('name', PrintingForm::query()->findOrFail((int)$state)->name)),
                     TextInput::make('name')
                         ->label(__('Название'))
-                        ->disabled(fn (callable $get) => $get('for_paper'))
+                        ->disabled(fn (callable $get) => $get('bindable_id'))
                         ->reactive()
                         ->unique()
                         ->required(),
@@ -63,12 +70,6 @@ class WarehouseItemCategoryResource extends Resource
             ->columns([
                 TextColumn::make('name')
                     ->label(__('Название')),
-                BadgeColumn::make('for_paper')
-                    ->label(__('Связано с типом бумаги'))
-                    ->formatStateUsing(fn ($state) => $state ? __('Да') : __('Нет'))
-                    ->colors([
-                        'success' => true
-                    ]),
                 TextColumn::make('items_count')
                     ->label(__('Количество товаров'))
                     ->counts('items'),
@@ -99,6 +100,4 @@ class WarehouseItemCategoryResource extends Resource
             'edit' => Pages\EditWarehouseItemCategory::route('/{record}/edit'),
         ];
     }
-
-
 }

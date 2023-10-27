@@ -15,4 +15,9 @@ class PaperType extends Model
     {
         return $this->hasMany(PaperProp::class);
     }
+
+    public function category()
+    {
+        return $this->morphOne(WarehouseItemCategory::class, 'bindable');
+    }
 }

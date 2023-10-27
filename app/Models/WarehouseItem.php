@@ -25,4 +25,9 @@ class WarehouseItem extends Model
     {
         return $this->morphTo(__FUNCTION__, 'association_type', 'association_id');
     }
+
+    public function papers()
+    {
+        return $this->morphTo(PaperProp::class, 'associatable');
+    }
 }

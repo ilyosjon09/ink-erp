@@ -23,4 +23,9 @@ class WarehouseItemCategory extends Model
     {
         return $this->hasMany(WarehouseItem::class, 'category_id');
     }
+
+    public function bindable()
+    {
+        return $this->morphTo();
+    }
 }
