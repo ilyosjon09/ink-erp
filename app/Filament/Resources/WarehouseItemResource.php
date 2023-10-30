@@ -50,7 +50,7 @@ class WarehouseItemResource extends Resource
                             ->searchable()
                             ->reactive()
                             ->columnSpanFull(),
-                        Select::make('grammage')
+                        Select::make('grammage'),
                         TextInput::make('code')
                             ->label(__('Код'))
                             ->placeholder('000')
