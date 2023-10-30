@@ -71,7 +71,7 @@ class Orders extends Component implements Tables\Contracts\HasTable
                     $category = WarehouseItemCategory::query()->with('items')->where('paper_type_id', $record->paperProperties->paperType->id)->first();
 
                     $item = $category->items->where('grammage', $record->paperProperties->grammage)->first();
-                    $warehouseItem =  WarehouseOperation::query()->where('item_id', $item->id)->latest()->first();
+                    // $warehouseItem =  WarehouseOperation::query()->where('item_id', $item->id)->latest()->first();
                     $price = $record->paperProperties->price;
                     WarehouseOperation::query()->create([
                         'item_id' => $item->id,
