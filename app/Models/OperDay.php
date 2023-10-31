@@ -30,4 +30,9 @@ class OperDay extends Model
     {
         return $this->hasMany(CashOfficeOperation::class);
     }
+
+    public function current()
+    {
+        return $this->where('is_current', true)->first();
+    }
 }

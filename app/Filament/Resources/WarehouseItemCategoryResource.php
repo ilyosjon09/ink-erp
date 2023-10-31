@@ -34,30 +34,16 @@ class WarehouseItemCategoryResource extends Resource
                 Grid::make(
                     1
                 )->schema([
-                    Select::make('bindable_type')
-                        ->label(__('Связать с'))
-                        ->options([
-                            PaperType::class => __('📄 Бумага'),
-                            PrintingForm::class => __('🖨️ Печатьние формы')
-                        ])->reactive(),
-                    Select::make('bindable_id')
-                        ->reactive()
-                        ->required(fn (callable $get) => $get('bindable_type') === PaperType::class)
-                        ->label(__('Тип'))
-                        ->options(fn () => PaperType::query()->select(['id', 'name'])->get()->mapWithKeys(fn ($paperType) => [$paperType->id => $paperType->name]))
-                        ->hidden(fn (callable $get) => $get('bindable_type') !== PaperType::class)
-                        ->afterStateUpdated(callback: fn ($state, callable $set) => $set('name', PaperType::query()->findOrFail((int)$state)->name)),
-                    Select::make('bindable_id')
-                        ->required(fn (callable $get) => $get('bindable_type') === PrintingForm::class)
-                        ->label(__('Форма'))
-                        ->reactive()
-                        ->options(fn () => PrintingForm::query()->select(['id', 'name'])->get()->mapWithKeys(fn ($paperType) => [$paperType->id => $paperType->name]))
-                        ->hidden(fn (callable $get) => $get('bindable_type') !== PrintingForm::class)
-                        ->afterStateUpdated(callback: fn ($state, callable $set) => $set('name', PrintingForm::query()->findOrFail((int)$state)->name)),
                     TextInput::make('name')
                         ->label(__('Название'))
                         ->disabled(fn (callable $get) => $get('bindable_id'))
                         ->reactive()
+                        ->disabled(function ($context, $record) {
+                            return match ($context) {
+                                'edit', 'view' => $record?->for_paper,
+                                default => false
+                            };
+                        })
                         ->unique()
                         ->required(),
                 ])->columnSpan(1),

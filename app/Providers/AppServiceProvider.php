@@ -36,7 +36,7 @@ class AppServiceProvider extends ServiceProvider
                 NavigationGroup::make()
                     ->label(__('Работа')),
                 NavigationGroup::make()
-                    ->label(__('Ка1сса')),
+                    ->label(__('Касса')),
                 NavigationGroup::make()
                     ->label(__('Склад')),
                 NavigationGroup::make()

@@ -21,13 +21,8 @@ class WarehouseItem extends Model
         return $this->belongsTo(WarehouseItemCategory::class, 'category_id');
     }
 
-    public function association()
+    public function warehouseItemBatches()
     {
-        return $this->morphTo(__FUNCTION__, 'association_type', 'association_id');
-    }
-
-    public function papers()
-    {
-        return $this->morphTo(PaperProp::class, 'associatable');
+        return $this->hasMany(WarehouseItemBatch::class);
     }
 }

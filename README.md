@@ -1,4 +1,16 @@
 ## Todo
+### Ultra High Priority Tasks
+- [ ] Finish warehouse management
+  - [ ] bind papers from paper props page
+  - [ ] create batches table and integrate operations with it
+- [ ] Finish cash office
+  - [ ] recursive relationship of categories
+- [ ] Pivot report
+  - [ ] gatcher data
+    - [ ] orders
+    - [ ] warehouse
+    - [ ] cash office
+      - [ ] clients
 ### High priority tasks
 - [x] Add division marker for paper props
 - [ ] Add paper based on grammage

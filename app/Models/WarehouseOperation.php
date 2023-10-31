@@ -15,9 +15,9 @@ class WarehouseOperation extends Model
         'operation' => OperationType::class,
     ];
 
-    public function item()
+    public function batch()
     {
-        return $this->belongsTo(WarehouseItem::class, 'item_id');
+        return $this->belongsTo(WarehouseItemBatch::class, 'warehouse_item_batch_id');
     }
 
     public function creator()

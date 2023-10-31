@@ -45,12 +45,11 @@ class WarehouseItemResource extends Resource
                     [
                         Select::make('category_id')
                             ->label(__('Категория'))
-                            ->relationship('category', 'name')
+                            ->relationship('category', 'name', fn (Builder $query) => $query->whereForPaper(false))
                             ->preload()
                             ->searchable()
                             ->reactive()
                             ->columnSpanFull(),
-                        Select::make('grammage'),
                         TextInput::make('code')
                             ->label(__('Код'))
                             ->placeholder('000')
@@ -95,7 +94,12 @@ class WarehouseItemResource extends Resource
                             ])->columnSpan(1),
                         ])->visibleOn('edit')
                     ],
-                )->maxWidth('2xl')
+                )->maxWidth('2xl')->disabled(function ($context, $record) {
+                    return match ($context) {
+                        'edit', 'view' => $record?->for_paper,
+                        default => false
+                    };
+                })
             ]);
     }
 

@@ -16,16 +16,11 @@ class WarehouseItemCategory extends Model
 
     public function paperType()
     {
-        return $this->belongsTo(PaperType::class);
+        return $this->hasOne(PaperType::class);
     }
 
     public function items()
     {
         return $this->hasMany(WarehouseItem::class, 'category_id');
-    }
-
-    public function bindable()
-    {
-        return $this->morphTo();
     }
 }
