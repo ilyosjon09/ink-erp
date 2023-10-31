@@ -160,7 +160,7 @@ class WarehouseOperationResource extends Resource
             *, 
             case operation when 0 then amount else null end as debet, 
             case operation when 1 then amount else null end as credit,
-            ( SELECT case when i.category_id is null then i.name else CONCAT(c.name,' → ', i.name) end full_name from warehouse_items i left JOIN warehouse_item_categories c on i.category_id = c.id where i.id = warehouse_operations.item_id ) full_name
+           ( SELECT case when i.category_id is null then i.name else CONCAT(c.name,' → ', i.name) end full_name from warehouse_item_batches b left join warehouse_items i on b.warehouse_item_id = i.id left JOIN warehouse_item_categories c on i.category_id = c.id where b.id = warehouse_operations.warehouse_item_batch_id ) full_name
         SQL;
         return parent::getEloquentQuery()->withoutGlobalScopes()->with('creator')->selectRaw($selectStatement);
     }
