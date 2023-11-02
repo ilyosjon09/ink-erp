@@ -60,6 +60,19 @@ class WarehouseOperationService
 
     public function stockOut($itemId, $quantity, $price, $createdAt)
     {
+
+        /**
+         *  Determine a batch to stock-out from
+         *  - Check if batch exists for given item
+         *  - if there is no batch notify that there is no item to stock out and exit
+         *  - if batches exist then select the oldest batch that (in stock - out stock) not equal to 0
+         *  - if there is no such notify that there is no item to stock out and exit
+         *  - else check if (out stock + quantity) is greater than selected batch
+         *  - if yes then add quantity value to out stock value then exit
+         *  - if no then calculate how much needed to make selected batch in stock - out stock = 0 then add it to out stock of it
+         *  - add remaining quantity to next batches until quantity becomes 0
+         *  
+         */
         /** @var Builder $batchesQuery */
         $batchesQuery = WarehouseItemBatch::query()->whereRaw('warehouse_item_id = ? and (in_quantity - out_quantity) > 0', [$itemId]);
         /** @var Collection $batches */
