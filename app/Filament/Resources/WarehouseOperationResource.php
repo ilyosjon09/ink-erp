@@ -7,6 +7,8 @@ use App\Filament\Resources\WarehouseOperationResource\Pages;
 use App\Filament\Resources\WarehouseOperationResource\RelationManagers;
 use App\Models\WarehouseItem;
 use App\Models\WarehouseOperation;
+use App\Services\WarehouseOperationService;
+use Closure;
 use Filament\Forms;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\DatePicker;
@@ -25,6 +27,8 @@ use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Facades\DB;
+use Filament\Notifications\Notification;
+
 
 class WarehouseOperationResource extends Resource
 {
@@ -85,7 +89,19 @@ class WarehouseOperationResource extends Resource
                     ->label(__('Количество'))
                     ->numeric()
                     ->minValue(1)
-                    ->required(),
+                    ->rules([
+                        'required',
+                        function (callable $get) {
+                            return function (string $attribute, $value, Closure $fail) use ($get) {
+                                $remainingStock = (new WarehouseOperationService)->getRemainingStock($get('item_id'));
+                                $operationType = OperationType::from((int)$get('operation'));
+                                if ($operationType === OperationType::SUBTRACT && $remainingStock < $value) {
+                                    $message = __("На складе недостаточно товара. Текущее количество: {$remainingStock}");
+                                    $fail($message);
+                                }
+                            };
+                        },
+                    ]),
                 TextInput::make('price')
                     ->label(__('Цена'))
                     ->numeric()

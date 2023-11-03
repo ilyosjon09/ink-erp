@@ -19,7 +19,14 @@ class ManageWarehouseOperations extends ManageRecords
                 $operationService = new WarehouseOperationService;
                 match (OperationType::from($data['operation'])) {
                     OperationType::ADD => $operationService->stockIn($data['item_id'], $data['amount'], $data['price'], $data['created_at']),
-                    OperationType::SUBTRACT => $operationService->stockOut($data['item_id'], $data['amount'], $data['price'], $data['created_at']),
+                    OperationType::SUBTRACT => function () use ($operationService, $data) {
+                        $operationService->stockOut(
+                            $data['item_id'],
+                            $data['amount'],
+                            $data['price'],
+                            $data['created_at']
+                        );
+                    },
                 };
             }),
         ];

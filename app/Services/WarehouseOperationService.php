@@ -11,6 +11,12 @@ use Illuminate\Database\Eloquent\Collection;
 
 class WarehouseOperationService
 {
+
+    public function getRemainingStock($itemId): int
+    {
+        return WarehouseItemBatch::query()->selectRaw('IFNULL(SUM(in_quantity) - SUM(out_quantity), 0) remaining_stock')->where('warehouse_item_id', $itemId)->first()->remaining_stock;
+    }
+
     public function stockIn(int $itemId, int $quantity, int $price, $createdAt)
     {
         /** @var Builder $batchesQuery */
@@ -90,15 +96,15 @@ class WarehouseOperationService
                 return;
             }
         });
-        WarehouseOperation::query()
-            ->create([
-                'warehouse_item_batch_id' => $currentBatch->id,
-                'oper_day_id' => operday()->id,
-                'operation' => OperationType::ADD,
-                'amount' => $quantity,
-                'price' => $price,
-                'created_at' => $createdAt,
-                'created_by' => auth()->id()
-            ]);
+        // WarehouseOperation::query()
+        //     ->create([
+        //         'warehouse_item_batch_id' => $currentBatch->id,
+        //         'oper_day_id' => operday()->id,
+        //         'operation' => OperationType::ADD,
+        //         'amount' => $quantity,
+        //         'price' => $price,
+        //         'created_at' => $createdAt,
+        //         'created_by' => auth()->id()
+        //     ]);
     }
 }
